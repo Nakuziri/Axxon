@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:make": "KNEX_MIGRATION_EXTENSION=ts knex migrate:make --knexfile knexfile.ts",
+    "migrate:latest": "ts-node --project tsconfig.json ./node_modules/.bin/knex migrate:latest --knexfile knexfile.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^9.29.0",
@@ -34,6 +36,7 @@
     "knex": "^3.1.0",
     "postcss": "^8.5.5",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.2",
     "typescript": "^5"
   }

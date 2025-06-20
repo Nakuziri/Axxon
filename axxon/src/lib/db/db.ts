@@ -1,19 +1,19 @@
-import type { Knex } from 'knex';
+import knex, { Knex } from 'knex';
 
-const config: { [key: string]: Knex.Config } = {
-  development: {
-    client: 'pg',
-    connection: {
-      host: process.env.PG_HOST,
-      user: process.env.PG_USER,
-      password: process.env.PG_PASS,
-      database: process.env.PG_DB
-    },
-    migrations: {
-      directory: './migrations',
-      extension: 'ts'
-    }
-  }
+const config: Knex.Config = {
+  client: 'pg',
+  connection: {
+    host: process.env.PG_HOST,
+    user: process.env.PG_USER,
+    password: process.env.PG_PASS,
+    database: process.env.PG_DB,
+  },
+  migrations: {
+    directory: './migrations',
+    extension: 'ts',
+  },
 };
 
-export default config;
+const db = knex(config);
+
+export default db;

@@ -1,4 +1,4 @@
-import { handleOAuthLogin } from "@/lib/controllers/authControllers";
+import { handleOAuthLogin } from "@/lib/controllers/authController";
 import { NextRequest } from "next/server";
 
 //nextjs routes handle requests and responses differently 

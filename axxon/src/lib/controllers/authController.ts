@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import db from '../db/db';
 import jwt from 'jsonwebtoken';
 
@@ -33,8 +34,21 @@ export const handleOAuthLogin = async (req: NextRequest) => {
             return NextResponse.json({ message: 'Server misconfiguration.' }, {status:500});
         }
         
-        const token = jwt.sign({ id: user.id, email: user.email, name: user.first_name }, jwtSecret, { expiresIn: '7d' }); // expiration set to seven days
+        const token = jwt.sign(
+            { id: user.id, email: user.email, name: user.first_name },
+             jwtSecret,
+            { expiresIn: '7d' }
+        ); // expiration set to seven days
 
+        //waits for cookieStoring to return then sets up validated and secure cookie
+        const cookieStoring = await cookies();
+        cookieStoring.set('token', token, {
+            httpOnly: true, //prevents js from reading cookies
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+            path: '/'
+        });
+       
         return NextResponse.json({ user, token }, {status:200});
         
     }catch (error) {

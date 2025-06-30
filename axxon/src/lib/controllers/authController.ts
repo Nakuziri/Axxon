@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import db from '../db/db';
 import jwt from 'jsonwebtoken';
 
-export const handleOAuthLogin = async (req: NextRequest) => {
+//using NextRequest and NextResponse TypeAnnotations helps identify specific return values 
+//while allowing me to utilize next helpers like NextResponse.json()   
+export const handleOAuthLogin = async (req: NextRequest): Promise<NextResponse>=> {
     try{
         //grabs the users info
         const body = await req.json();

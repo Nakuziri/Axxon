@@ -1,7 +1,6 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const nextConfig = {
-  // Your existing Next.js configuration
    webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,

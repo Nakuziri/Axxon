@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
     // Check or create user in DB
     let user = await db('users').where({ email: decoded.email }).first();
 
+    //Creates user
     if (!user) {
       const [newUser] = await db('users')
         .insert({

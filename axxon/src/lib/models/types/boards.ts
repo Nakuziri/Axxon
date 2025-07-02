@@ -6,16 +6,12 @@ export type BoardBaseData = {
   updated_at: string;
 };
 
-export type BoardCreation = {
-    name: string;
-    created_by: number;
-}
+//pick<> can be used to pick out specific things within type declaration
+export type BoardCreation = Pick<BoardBaseData, 'name' | 'created_by'>;
 
 //Setup for future use, Partial allows fields to be optional meaning 
 // that not everything needs to be updated
 //keeps id required while name is optional
-export type UpdateBoard = {
-    id: number;
-} & Partial<{
-    name: string;
-}>
+export type UpdateBoard = Partial<Pick<BoardBaseData, 'name'>> & { id: number };
+
+export type ListBoardCreator = Pick<BoardBaseData, 'created_by'>;

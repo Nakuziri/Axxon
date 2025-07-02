@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db';
-import type { BoardBaseData, BoardCreation, UpdateBoard } from './types/boards';
+import type { BoardBaseData, BoardCreation, UpdateBoard, ListBoardCreator } from './types/boards';
 //when pre-defining types, I have two options. Either I predefine them a seperate variable within a different file or place it within the methods data. 
 //Since is a project I plan to upscale, I'll preDefine the types
 
@@ -37,9 +37,9 @@ export class Board {
         return board || null;
     }
 
-    static listAllByCreator = async (userId: number): Promise<Board[]> => {
+    static listAllByCreator = async (data: ListBoardCreator): Promise<Board[]> => {
         return await knex('boards')
-         .where({ created_by: userId })
+         .where({ created_by: data.created_by })
          .orderBy('created_at','desc');//orders descending by most recent
     }
 }

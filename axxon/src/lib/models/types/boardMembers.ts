@@ -3,4 +3,6 @@ export type BoardMembersData = {
     board_id: number
 };
 
+export type ListBoardsForUser = Pick<BoardMembersData, 'user_id'>;
 
+export type GetAllMembersForBoard = Pick<BoardMembersData, 'board_id'>;

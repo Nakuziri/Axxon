@@ -15,5 +15,5 @@ export type BoardCreation = Pick<BoardBaseData, 'name' | 'created_by'> & {
 // that not everything needs to be updated
 //keeps id required while name is optional
 export type UpdateBoard = Partial<Pick<BoardBaseData, 'name'>> & { id: number };
-
 export type ListBoardCreator = Pick<BoardBaseData, 'created_by'>;
+export type DeleteBoard = Pick<BoardBaseData, 'id'>;

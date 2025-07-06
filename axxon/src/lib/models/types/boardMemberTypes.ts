@@ -4,5 +4,6 @@ export type BoardMembersData = {
 };
 
 export type ListBoardsForUser = Pick<BoardMembersData, 'user_id'>;
-
 export type GetAllMembersForBoard = Pick<BoardMembersData, 'board_id'>;
+export type AddBoardMember = BoardMembersData;
+export type RemoveBoardMember = BoardMembersData;

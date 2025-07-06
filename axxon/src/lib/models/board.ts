@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db';
-import type { BoardBaseData, BoardCreation, UpdateBoard, ListBoardCreator } from './types/boards';
+import type { BoardBaseData, BoardCreation, UpdateBoard, ListBoardCreator } from './types/boardTypes';
 //when pre-defining types, I have two options. Either I predefine them a seperate variable within a different file or place it within the methods data. 
 //Since is a project I plan to upscale, I'll preDefine the types
 

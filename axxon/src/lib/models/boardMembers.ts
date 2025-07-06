@@ -1,6 +1,6 @@
 import knex from '@/lib/db/db';
-import type { BoardMembersData, ListBoardsForUser, GetAllMembersForBoard } from './types/boardMembers';
-import type { BoardBaseData } from './types/boards';
+import type { BoardMembersData, ListBoardsForUser, GetAllMembersForBoard } from './types/boardMemberTypes';
+import type { BoardBaseData } from './types/boardTypes';
 import type { User } from './types/users';
 
 

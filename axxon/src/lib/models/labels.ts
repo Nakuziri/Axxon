@@ -1,6 +1,5 @@
 import knex from '@/lib/db/db'
 import { LabelBaseData, CreateLabelData } from "./types/labelTypes"
-import { dataTagErrorSymbol } from '@tanstack/react-query'
 
 class Labels {
     id: number

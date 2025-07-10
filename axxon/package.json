@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "migrate:make": "KNEX_MIGRATION_EXTENSION=ts knex migrate:make --knexfile knexfile.ts",
-    "migrate:latest": "knex migrate:latest --knexfile knexfile.ts --esm"
+    "migrate:latest": "ts-node --esm ./node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^9.29.0",

@@ -1,19 +1,12 @@
 import knex from '@/lib/db/db';
-import type { BoardMembersData, ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMember } from './types/boardMemberTypes';
+import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMember, GetMemberById, BoardMembersBaseData } from './types/boardMemberTypes';
 import type { BoardBaseData } from './types/boardTypes';
 import type { User } from './types/users';
 
 
 export class BoardMembers {
-  user_id: number;
-  board_id: number;
 
-  constructor({ user_id, board_id }: BoardMembersData) {
-    this.user_id = user_id;
-    this.board_id = board_id;
-  }
-
-//user_id destructures the data so that you can utilize it under where
+  //user_id destructures the data so that you can utilize it under where
 // Lists all boards that a user is a member of
   static listBoardsForUser = async (data: ListBoardsForUser): Promise<BoardBaseData[]> => {
     return await knex('boards')//server as table A for join conditions
@@ -39,5 +32,10 @@ export class BoardMembers {
   static addMember = async (data: AddBoardMember): Promise<number[]> => {
     return await knex('board_members')
     .insert({ user_id: data.user_id, board_id: data.board_id });
-  }
+  };
+
+  //used for detailed member view/deletion section
+  static getMemberById = async (data: GetMemberById): Promise<BoardMembersBaseData | null> => {
+    return await knex('board_members').where({user_id: data.user_id, board_id: data.board_id}).first() || null;
+  };
 }

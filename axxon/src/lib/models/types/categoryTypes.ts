@@ -1,4 +1,4 @@
-export type CategoryBase = {
+export type CategoryBaseData = {
   id: number;
   name: string;
   color: string;
@@ -9,7 +9,8 @@ export type CategoryBase = {
   updated_at: string;
 }
 
-export type CreateCategory = Pick<CategoryBase, 'name' | 'color' | 'board_id' | 'position' | 'is_done'>;
-export type UpdateCategory = Partial<Pick<CategoryBase, 'name' | 'color' | 'position' | 'is_done'>> & { id: number };
-export type DeleteCategory = Pick<CategoryBase, 'id'>;
-export type ListCategoriesForBoard = Pick<CategoryBase, 'board_id'>;
+export type CreateCategory = Pick<CategoryBaseData, 'name' | 'color' | 'board_id' | 'position' | 'is_done'>;
+export type UpdateCategory = Partial<Pick<CategoryBaseData, 'name' | 'color' | 'position' | 'is_done'>> & { id: number };
+export type DeleteCategory = Pick<CategoryBaseData, 'id'>;
+export type ListCategoriesForBoard = Pick<CategoryBaseData, 'board_id'>;
+export type GetCategoryById = Pick<CategoryBaseData, 'id'>

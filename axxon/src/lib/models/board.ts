@@ -4,17 +4,7 @@ import type { BoardBaseData, BoardCreation, UpdateBoard, DeleteBoard, ListBoardC
 //Since is a project I plan to upscale, I'll preDefine the types
 
 export class Board {
-    //allows class to know what it's working with  for types. Defines whats on this
-    id: number
-    name: string
-    created_by: number
 
-    constructor({id, name, created_by}: BoardBaseData ) {
-        this.id = id
-        this.name = name
-        this.created_by = created_by
-    }
-    //TODO: Auto Create Team Chats in the future
     static createBoard = async (data: BoardCreation): Promise<BoardBaseData> => {
         return await knex.transaction(async (trx) => {
         // Create the board using trx
@@ -75,7 +65,7 @@ export class Board {
 
         const [board] = await knex('boards')
          .where({id})
-         .update({ updateData, updated_at: knex.fn.now() })
+         .update({ ...updateData, updated_at: knex.fn.now() })
          .returning('*')
         
         return board || null;
@@ -91,10 +81,10 @@ export class Board {
         return await knex('boards')
          .where({ created_by: data.created_by })
          .orderBy('created_at','desc');//orders descending by most recent
-    }
+    };
     
     //needed for nested dynamic route
     static getBoardById = async (data: GetBoardById): Promise<BoardBaseData | null> => {
         return await knex('boards').where({id: data.id}).first() || null;
-    }
+    };
 }

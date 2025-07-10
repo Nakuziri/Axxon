@@ -19,3 +19,4 @@ export type BoardCreation = Pick<BoardBaseData, 'name' | 'created_by'> & {
 export type UpdateBoard = Pick<BoardBaseData,'id'> & Partial<Pick<BoardBaseData, 'name'>>;
 export type ListBoardCreator = Pick<BoardBaseData, 'created_by'>;
 export type DeleteBoard = Pick<BoardBaseData, 'id'>;
+export type GetBoardById = Pick<BoardBaseData, 'id'>;

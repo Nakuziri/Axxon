@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('boards')
             .onDelete('CASCADE');
 
-        table.string('name').notNullable();
+        table.string('name').notNullable().index();
         table.string('color');
     })
 }

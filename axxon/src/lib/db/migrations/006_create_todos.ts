@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('boards')
             .onDelete('CASCADE');
 
-        table.string('title').notNullable();
+        table.string('title').notNullable().index();
         table.text('description');
         table.date('due_date');
 
@@ -24,6 +24,8 @@ export async function up(knex: Knex): Promise<void> {
             .references('id')
             .inTable('categories')
             .onDelete('CASCADE');
+
+        table.boolean('is_complete').defaultTo(false)
 
         table.timestamp('created_at').defaultTo(knex.fn.now());
         table.timestamp('updated_at').defaultTo(knex.fn.now());

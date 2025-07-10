@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db';
-import type { BoardBaseData, BoardCreation, UpdateBoard, DeleteBoard, ListBoardCreator } from './types/boardTypes';
+import type { BoardBaseData, BoardCreation, UpdateBoard, DeleteBoard, ListBoardCreator, GetBoardById } from './types/boardTypes';
 //when pre-defining types, I have two options. Either I predefine them a seperate variable within a different file or place it within the methods data. 
 //Since is a project I plan to upscale, I'll preDefine the types
 
@@ -91,5 +91,10 @@ export class Board {
         return await knex('boards')
          .where({ created_by: data.created_by })
          .orderBy('created_at','desc');//orders descending by most recent
+    }
+    
+    //needed for nested dynamic route
+    static getBoardById = async (data: GetBoardById): Promise<BoardBaseData | null> => {
+        return await knex('boards').where({id: data.id}).first() || null;
     }
 }

@@ -1,5 +1,6 @@
 import knex from '@/lib/db/db'
-import { LabelBaseData, CreateLabelData } from "./types/labelTypes"
+import { LabelBaseData, CreateLabelData, DeleteLabelData, UpdateLabelData, ListAllLabelsData } from "./types/labelTypes"
+import { getAvailableColor} from '../utils/colorPicker'
 
 class Labels {
     id: number
@@ -14,6 +15,8 @@ class Labels {
         this.color = color
     }
 
+    //destructure label return data due how insert returns work
+    //insert returns in an array or objects without destructure
     static createLabel = async (data: CreateLabelData ): Promise<LabelBaseData> => {
         const [label] = await knex('labels')
         .insert( {
@@ -24,5 +27,28 @@ class Labels {
         .returning('*');
 
         return label;
+    }
+
+    static deleteLabel = async (data: DeleteLabelData ): Promise<number> => {
+        return await knex('labels')
+        .where({id: data.id})
+        .del();
+    }
+
+    static updateLabel = async (data: UpdateLabelData): Promise<LabelBaseData | null> => {
+        const {id, ...updateData } = data;
+
+        const [label] = await knex('labels')
+        .where({id})
+        .update(updateData)
+        .returning('*')
+
+        return label || null;    
+    }
+
+    static listAllLabelsInBoard = async(data: ListAllLabelsData): Promise<LabelBaseData[]> =>{ 
+    return await knex('labels')
+     .where({board_id: data.board_id})
+     .orderBy('id', 'desc');
     }
 }

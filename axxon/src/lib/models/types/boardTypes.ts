@@ -1,3 +1,5 @@
+import { Board } from "../board";
+
 export type BoardBaseData = {
   id: number;
   name: string;
@@ -14,6 +16,6 @@ export type BoardCreation = Pick<BoardBaseData, 'name' | 'created_by'> & {
 //Setup for future use, Partial allows fields to be optional meaning 
 // that not everything needs to be updated
 //keeps id required while name is optional
-export type UpdateBoard = Partial<Pick<BoardBaseData, 'name'>> & { id: number };
+export type UpdateBoard = Pick<BoardBaseData,'id'> & Partial<Pick<BoardBaseData, 'name'>>;
 export type ListBoardCreator = Pick<BoardBaseData, 'created_by'>;
 export type DeleteBoard = Pick<BoardBaseData, 'id'>;

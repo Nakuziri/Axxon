@@ -1,7 +1,7 @@
 export type CategoryBase = {
   id: number;
   name: string;
-  color: string | null;
+  color: string;
   board_id: number;
   position: number;
   is_done: boolean;

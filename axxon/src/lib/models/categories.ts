@@ -1,5 +1,6 @@
 import knex from '@/lib/db/db';
 import type { CategoryBase, CreateCategory, UpdateCategory, DeleteCategory, ListCategoriesForBoard } from './types/categoryTypes';
+import { getAvailableColor } from '../utils/colorPicker';
 
 export class Categories {
   id: number;
@@ -23,27 +24,8 @@ export class Categories {
   }
 
     static createCategory = async (data: CreateCategory): Promise<CategoryBase> => {
-    const fallbackColors = [
-      '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
-      '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#22D3EE',
-      '#A855F7', '#EAB308', '#4ADE80', '#F43F5E', '#94A3B8',
-    ];
-
-    // Get existing colors on this board
-    const usedColors = await knex('categories')
-      .where({ board_id: data.board_id })
-      .select('color');
-    const existingColors = usedColors.map(c => c.color);
-    const availableColors = fallbackColors.filter(
-      color => !existingColors.includes(color)
-    );
-
-    // Picks a color
-    const color =
-      data.color ??
-      (availableColors.length > 0
-        ? availableColors[Math.floor(Math.random() * availableColors.length)]
-        : '#9CA3AF'); // default to gray
+    
+    const color = await getAvailableColor('categories', data.board_id, data.color);
 
     // Get count of categories for the board if position is not provided
     const positionCount = await knex('categories')

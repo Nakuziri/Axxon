@@ -3,6 +3,7 @@ export type TodoLabelsBaseData = {
     label_id: number
 }
 
-export type addLabelToTodo = TodoLabelsBaseData;
-export type removeLabelFromTodo = TodoLabelsBaseData;
-
+export type AddLabelToTodo = TodoLabelsBaseData;
+export type RemoveLabelFromTodo = TodoLabelsBaseData;
+export type GetLabelsOnTodo = Pick<TodoLabelsBaseData, 'todo_id'>;
+export type FilterTodosByLabel = Pick<TodoLabelsBaseData, 'label_id'>;

@@ -35,11 +35,11 @@ export class TodoLabels {
         .where({'todo_labels.todo_id': data.todo_id})            // Filter by the todo_id
         .select('labels.*');                                     // Return full label data
     };
-    
+
     static filterTodosByLabel = async (data: FilterTodosByLabel): Promise<TodoBaseData[]> => {
         return await knex('todos')
         .join('todo_labels', 'todos.id','todo_labels.todo_id')
         .where({'todo_labels.label_id': data.label_id})
         .select('todos.*');
     };
-}
+}x

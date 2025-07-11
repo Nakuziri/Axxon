@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db'
-import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData} from './types/todoTypes'
+import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData, GetTodoByStatusData, SearchTodoByTitle} from './types/todoTypes'
 
 export class Todos {
 
@@ -43,6 +43,7 @@ export class Todos {
         .orderBy('id','desc');
     };
 
+    //used for checking dupes on todo cration
     static getTodoByName = async(data: GetTodoByNameData): Promise<TodoBaseData | null> => {
         const todo = await knex ('todos')
         .where({ title: data.title, board_id: data.board_id})
@@ -70,11 +71,25 @@ export class Todos {
         return await knex('todos')
         .where({
             board_id: data.board_id,
-            assignee_id: data.assignee_id,
+            assignee_id: data.assignee_id
         })
         .orderBy('id', 'desc');
     };
 
-    
+    static filterByStatusState = async (data: GetTodoByStatusData): Promise<TodoBaseData[]> => {
+        return await knex('todos')
+        .where({
+            board_id: data.board_id,
+            category_id: data.category_id
+        })
+        .orderBy('id','desc');
+    };
+
+    static searchTodosByTitle = async (data: SearchTodoByTitle): Promise<TodoBaseData[]> => {
+        return await knex('todos')
+        .where('board_id', data.board_id)
+        .andWhere('title', 'ilike', `%${data.keyword}%`) // fuzzy, case-insensitive
+        .orderBy('id', 'desc');
+    };
 
 }

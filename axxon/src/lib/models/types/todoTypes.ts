@@ -19,4 +19,6 @@ export type ListAllTodosData = Pick<TodoBaseData, 'board_id'>
 export type GetTodoByNameData = Pick<TodoBaseData, 'title' | 'board_id'>;
 export type GetTodoByIdData = Pick<TodoBaseData, 'id'>;
 export type GetTodoByCompletionData = Pick<TodoBaseData, 'is_complete'>;
-export type GetTodoByAssigneeData = Pick<TodoBaseData, 'assignee_id' | 'board_id'>
+export type GetTodoByAssigneeData = Pick<TodoBaseData, 'assignee_id' | 'board_id'>;
+export type GetTodoByStatusData = Pick<TodoBaseData, 'category_id' | 'board_id'>;
+export type SearchTodoByTitle = Pick<TodoBaseData,'board_id'> & {keyword: string}

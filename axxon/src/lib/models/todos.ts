@@ -2,7 +2,6 @@ import knex from '@/lib/db/db'
 import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData, GetTodoByStatusData, SearchTodoByTitle} from './types/todoTypes'
 
 export class Todos {
-
     static createTodo = async(data: CreateTodoData): Promise<TodoBaseData> => {
         const[todo] = await knex('todos')
         .insert({
@@ -24,6 +23,7 @@ export class Todos {
         return await knex('todos')
         .where({id: data.id})
         .del();
+        
     };
 
     static updateTodo = async(data: UpdateTodoData): Promise<TodoBaseData | null> => {
@@ -43,7 +43,7 @@ export class Todos {
         .orderBy('id','desc');
     };
 
-    //used for checking dupes on todo cration
+    //used for cShecking dupes on todo cration
     static getTodoByName = async(data: GetTodoByNameData): Promise<TodoBaseData | null> => {
         const todo = await knex ('todos')
         .where({ title: data.title, board_id: data.board_id})
@@ -91,5 +91,4 @@ export class Todos {
         .andWhere('title', 'ilike', `%${data.keyword}%`) // fuzzy, case-insensitive
         .orderBy('id', 'desc');
     };
-
 }

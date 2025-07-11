@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db'
-import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData } from './types/todoTypes'
+import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData} from './types/todoTypes'
 
 export class Todos {
 
@@ -66,6 +66,15 @@ export class Todos {
         .orderBy('id', 'desc');
     };
 
+    static filterByAssignee = async (data: GetTodoByAssigneeData): Promise<TodoBaseData[]> => {
+        return await knex('todos')
+        .where({
+            board_id: data.board_id,
+            assignee_id: data.assignee_id,
+        })
+        .orderBy('id', 'desc');
+    };
 
     
+
 }

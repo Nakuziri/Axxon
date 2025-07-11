@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db'
-import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData } from './types/todoTypes'
+import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData } from './types/todoTypes'
 
 export class Todos {
 
@@ -59,4 +59,13 @@ export class Todos {
 
         return todo || null;
     };
-};
+
+    static filterByCompletion = async (data: GetTodoByCompletionData): Promise<TodoBaseData[]> => {
+        return await knex('todos')
+        .where({ is_complete: data.is_complete })
+        .orderBy('id', 'desc');
+    };
+
+
+    
+}

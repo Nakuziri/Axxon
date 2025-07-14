@@ -1,7 +1,7 @@
 import knex from '@/lib/db/db';
-import { ConversationsBaseData, CreateConversation, GetConversationById, ListConversationsInBoard } from './types/conversationTypes';
+import { ConversationsBaseData, CreateConversation, DeleteConversation, GetConversationById, ListConversationsInBoard } from './types/conversationTypes';
 
-export class conversations {
+export class Conversations {
     static createConversation = async (data:CreateConversation): Promise<ConversationsBaseData> => {
         const [conversation] = await knex('conversations')
             .insert({
@@ -17,7 +17,7 @@ export class conversations {
     //gets a conv by its id for opening a chat
     static getConversationById = async (data: GetConversationById): Promise<ConversationsBaseData | null> =>{
         const conversation = await knex('conversations')
-        .where({id: data.id})
+        .where({id: data.board_id})
         .first()
 
         return conversation || null;
@@ -30,10 +30,12 @@ export class conversations {
         .orderBy('created_at','asc')
     };
 
-    /*
-    TODO SINCE IM STEPPING OUT TEMPORARILY
-    -CREATE A METHOD FOR ADDING USERS TO CONVO
-    -CREATE A METHOD FOR REMOVING USERS FROM CONVO
-    -CREATE A METHOD TO LIST ALL USERS IN CONVO
-    */
+    static deleteConversation = async (data: DeleteConversation): Promise<ConversationsBaseData | null> => {
+        const [conversation] = await knex('conversations')
+            .where({id: data.id})
+            .del()
+            .returning('*')
+
+        return conversation || null;
+    };
 }

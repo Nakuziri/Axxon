@@ -2,6 +2,8 @@ import knex from '@/lib/db/db';
 import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMember, GetMemberById, BoardMembersBaseData } from './types/boardMemberTypes';
 import type { BoardBaseData } from './types/boardTypes';
 import type { User } from './types/users';
+import { Conversations } from './conversations';
+import { ConversationMembers } from './conversationMembers';
 
 
 export class BoardMembers {
@@ -29,9 +31,23 @@ export class BoardMembers {
     .del();
   };
 
-  static addMember = async (data: AddBoardMember): Promise<number[]> => {
-    return await knex('board_members')
+  static addMember = async (data: AddBoardMember): Promise<void> => {
+    //add member to board
+    await knex('board_members')
     .insert({ user_id: data.user_id, board_id: data.board_id });
+
+    //find the board convo
+    const mainConvo = await Conversations.getConversationById({
+      board_id: data.board_id
+    });
+
+    //add user to main board conv
+    if(mainConvo) {
+      await ConversationMembers.addUserToConversation({
+        conversation_id: mainConvo.id,
+        user_id: data.user_id
+      });
+    }
   };
 
   //used for detailed member view/deletion section

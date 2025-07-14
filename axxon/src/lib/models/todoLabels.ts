@@ -42,4 +42,4 @@ export class TodoLabels {
         .where({'todo_labels.label_id': data.label_id})
         .select('todos.*');
     };
-}x
+}

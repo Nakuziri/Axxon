@@ -7,5 +7,6 @@ export type ConversationsBaseData = {
 };
 
 export type CreateConversation = Pick<ConversationsBaseData, 'board_id' | 'is_group' | 'title'>;
-export type GetConversationById = Pick<ConversationsBaseData, 'id'>;
+export type GetConversationById = Pick<ConversationsBaseData, 'board_id'>;
 export type ListConversationsInBoard = Pick<ConversationsBaseData, 'board_id'>;
+export type DeleteConversation = Pick<ConversationsBaseData, 'id'>

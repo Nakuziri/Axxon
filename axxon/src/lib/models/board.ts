@@ -13,7 +13,7 @@ export class Board {
             name: data.name,
             created_by: data.created_by,
             created_at: knex.fn.now(),
-            update_at: knex.fn.now(),
+            updated_at: knex.fn.now(),
             })
             .returning('*');
 
@@ -84,7 +84,7 @@ export class Board {
     };
     
     //needed for nested dynamic route
-    static getBoardById = async (data: GetBoardById): Promise<BoardBaseData | null> => {
-        return await knex('boards').where({id: data.id}).first() || null;
+    static getBoardById = async (id:number): Promise<BoardBaseData | null> => {
+        return await knex('boards').where({id}).first() || null;
     };
 }

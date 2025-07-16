@@ -17,7 +17,6 @@ export class Categories {
     // Use provided position or fallback to total count
     const finalPosition = data.position ?? parseInt(positionCount?.count as string, 10);
 
-
     // Insert category
     const [category] = await knex('categories')
       .insert({

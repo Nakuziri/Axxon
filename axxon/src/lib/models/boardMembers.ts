@@ -1,9 +1,9 @@
 import knex from '@/lib/db/db';
-import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMember, GetMemberById, BoardMembersBaseData } from './types/boardMemberTypes';
+import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMembersByEmail, GetMemberById, BoardMembersBaseData } from './types/boardMemberTypes';
 import type { BoardBaseData } from './types/boardTypes';
 import type { User } from './types/users';
 import { Conversations } from './conversations';
-import { ConversationMembers } from './conversationMembers';
+
 
 
 export class BoardMembers {
@@ -31,23 +31,31 @@ export class BoardMembers {
     .del();
   };
 
-  static addMember = async (data: AddBoardMember): Promise<void> => {
-    //add member to board
-    await knex('board_members')
-    .insert({ user_id: data.user_id, board_id: data.board_id });
+  static addMembersByEmail = async (data: AddBoardMembersByEmail): Promise<void> => {
+    // Get user IDs from emails
+    const users = await knex('users').whereIn('email', data.emails).select('id');
 
-    //find the board convo
-    const mainConvo = await Conversations.getConversationById({
-      board_id: data.board_id
-    });
+    if (users.length === 0) return;
 
-    //add user to main board conv
-    if(mainConvo) {
-      await ConversationMembers.addUserToConversation({
-        conversation_id: mainConvo.id,
-        user_id: data.user_id
-      });
-    }
+    const memberInserts = users.map(user => ({
+      user_id: user.id,
+      board_id: data.board_id,
+    }));
+
+    await knex('board_members').insert(memberInserts);
+
+    // Find the main conversation for the board
+    const mainConvo = await Conversations.getConversationById({ board_id: data.board_id });
+
+    if (!mainConvo) return;
+
+    // Add each user to the main conversation
+    const conversationMemberInserts = users.map(user => ({
+      conversation_id: mainConvo.id,
+      user_id: user.id,
+    }));
+
+    await knex('conversation_members').insert(conversationMemberInserts);
   };
 
   //used for detailed member view/deletion section

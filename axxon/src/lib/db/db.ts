@@ -1,3 +1,5 @@
+'use server';
+
 import knex, { Knex } from 'knex';
 
 const config: Knex.Config = {

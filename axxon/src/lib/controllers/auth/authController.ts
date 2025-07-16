@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import db from '../db/db';
+import db from '../../db/db';
 import jwt from 'jsonwebtoken';
 
 //using NextRequest and NextResponse TypeAnnotations helps identify specific return values 

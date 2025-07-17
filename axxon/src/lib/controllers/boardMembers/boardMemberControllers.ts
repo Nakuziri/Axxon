@@ -3,9 +3,10 @@ import { BoardMembers } from '@/lib/models/boardMembers';
 import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/models/types/boardMemberTypes';
 
 //has to be specifically setup like this due to working with dynamic route
-export async function listBoardsForUsers(userId: number) {
-  const boards = await BoardMembers.listBoardsForUser({ user_id: userId });
-  return NextResponse.json(boards, { status: 200 });
+export async function GET(req: NextRequest,{ params }: { params: { id: string } }) {
+    const userId = parseInt(params.id);
+    const boards = await BoardMembers.listBoardsForUser({ user_id: userId });
+    return NextResponse.json(boards, { status: 200 });
 }
 
 export async function getAllMembersInBoard(boardId: number) {

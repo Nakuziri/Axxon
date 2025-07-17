@@ -47,7 +47,7 @@ export async function DELETE(req: NextRequest) {
 // lists out categories
 export async function GET(req: NextRequest) {
   try {
-    const { board_id }: ListCategoriesForBoard = await req.json(); // Consider switching to query param in future
+    const { board_id }: ListCategoriesForBoard = await req.json(); 
     const categories = await Categories.listAllCategoriesInBoard({ board_id });
     return NextResponse.json(categories, { status: 200 });
   } catch (error) {
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
 // GET
 export async function getCategoryByIdController(req: NextRequest) {
   try {
-    const { id }: GetCategoryById = await req.json(); // Ideally from `params`
+    const { id }: GetCategoryById = await req.json();
     const category = await Categories.getCategoryById({ id });
     return NextResponse.json(category, { status: 200 });
   } catch (error) {

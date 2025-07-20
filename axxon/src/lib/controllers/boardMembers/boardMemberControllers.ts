@@ -1,17 +1,31 @@
+/*
+THIS WHOLE CONTROLLER FILE SHOULD BE REVISED 
+TO ENSURE THAT CONTROLLERS WORK AS INTENDED
+*/
+
 import { NextRequest, NextResponse } from 'next/server';
 import { BoardMembers } from '@/lib/models/boardMembers';
 import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/models/types/boardMemberTypes';
 
 //has to be specifically setup like this due to working with dynamic route
-export async function GET(req: NextRequest,{ params }: { params: { id: string } }) {
-    const userId = parseInt(params.id);
+//lists all boards users is a member of
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+    const userId = Number(params.id);
     const boards = await BoardMembers.listBoardsForUser({ user_id: userId });
     return NextResponse.json(boards, { status: 200 });
 }
 
-export async function getAllMembersInBoard(boardId: number) {
-  const members = await BoardMembers.getAllMembersForBoard({ board_id: boardId });
-  return NextResponse.json(members, { status: 200 });
+//gets all board members
+export async function getAllMembersInBoard(req: NextRequest, { params }: {params: {boardId: string }}) {
+  try{  
+    const board_id = Number(params.boardId);
+    const members = await BoardMembers.getAllMembersForBoard({ board_id });
+
+    return NextResponse.json(members, {status: 200});
+  }catch(error){
+    console.error('[DISPLAY_BOARD_MEMBERS_ERROR]', error);
+    return NextResponse.json({error: 'failed to display board members'}, {status: 500});
+  }
 }
 
 //needs req since its DEL

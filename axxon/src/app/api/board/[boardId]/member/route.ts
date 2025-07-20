@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { addBoardMembersByEmail, getAllMembersInBoard } from '@/lib/controllers/boardMembers/boardMemberControllers';
 
 export async function POST(req: NextRequest) {

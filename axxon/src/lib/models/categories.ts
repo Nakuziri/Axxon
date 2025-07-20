@@ -62,5 +62,5 @@ export class Categories {
 
   static getCategoryById = async (data: GetCategoryById): Promise<CategoryBaseData | null> =>{
     return await knex('categories').where({id: data.id}).first() || null
-  }
+  };
 }

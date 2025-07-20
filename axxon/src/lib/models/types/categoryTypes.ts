@@ -10,7 +10,7 @@ export type CategoryBaseData = {
 }
 
 export type CreateCategory = Pick<CategoryBaseData, 'name' | 'color' | 'board_id' | 'position' | 'is_done'>;
-export type UpdateCategory = Partial<Pick<CategoryBaseData, 'name' | 'color' | 'position' | 'is_done'>> & { id: number };
+export type UpdateCategory = Partial<Pick<CategoryBaseData, 'name' | 'color' | 'position' | 'is_done'>> & { id: number; board_id: number; };
 export type DeleteCategory = Pick<CategoryBaseData, 'id'>;
 export type ListCategoriesForBoard = Pick<CategoryBaseData, 'board_id'>;
 export type GetCategoryById = Pick<CategoryBaseData, 'id'>

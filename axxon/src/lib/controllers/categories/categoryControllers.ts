@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Categories } from '@/lib/models/categories';
-import type {
-  CreateCategory,
-  UpdateCategory,
-  DeleteCategory,
-  ListCategoriesForBoard,
-  GetCategoryById,
-} from '@/lib/models/types/categoryTypes';
+import type { CreateCategory, UpdateCategory, GetCategoryById } from '@/lib/models/types/categoryTypes';
 
 // creates categories
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, context: { params: { boardId: string } }) {
   try {
-    const data: CreateCategory = await req.json();
+    const board_id = Number(context.params.boardId);
+    const body = await req.json();
+
+    const data: CreateCategory = { ...body, board_id };
+    
     const category = await Categories.createCategory(data);
+
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
     console.error('[CREATE_CATEGORY_ERROR]', error);
@@ -21,10 +20,16 @@ export async function POST(req: NextRequest) {
 }
 
 // updates categories
-export async function PATCH(req: NextRequest) {
+export async function PATCH(req: NextRequest, params: { boardId: string; categoryId: string }) {
   try {
-    const data: UpdateCategory = await req.json();
+    const board_id = Number(params.boardId);
+    const id = Number(params.categoryId);
+    const body = await req.json();
+
+    const data: UpdateCategory = { ...body, id, board_id };
+
     const category = await Categories.updateCategory(data);
+
     return NextResponse.json(category, { status: 200 });
   } catch (error) {
     console.error('[UPDATE_CATEGORY_ERROR]', error);
@@ -33,10 +38,11 @@ export async function PATCH(req: NextRequest) {
 }
 
 // Deletes categories
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: NextRequest, params: { boardId: string; categoryId: string }) {
   try {
-    const data: DeleteCategory = await req.json();
-    const deleted = await Categories.deleteCategory(data);
+    const id = Number(params.categoryId);
+    const deleted = await Categories.deleteCategory({ id });
+
     return NextResponse.json({ deleted }, { status: 200 });
   } catch (error) {
     console.error('[DELETE_CATEGORY_ERROR]', error);
@@ -45,25 +51,27 @@ export async function DELETE(req: NextRequest) {
 }
 
 // lists out categories
-export async function GET(req: NextRequest) {
-  try {
-    const { board_id }: ListCategoriesForBoard = await req.json(); 
-    const categories = await Categories.listAllCategoriesInBoard({ board_id });
-    return NextResponse.json(categories, { status: 200 });
-  } catch (error) {
+export async function GET(req: NextRequest, params: { boardId: string; }) {
+  try{
+    const board_id = Number(params.boardId);
+    const categories = await Categories.listAllCategoriesInBoard({board_id});
+    return NextResponse.json(categories, {status: 200});
+  }catch(error){
     console.error('[LIST_CATEGORIES_ERROR]', error);
-    return NextResponse.json({ error: 'Failed to list categories' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to display categories'},{status: 500});
   }
 }
 
-// GET
-export async function getCategoryByIdController(req: NextRequest) {
+// GetById
+export async function getCategoryByIdController(req: NextRequest, params: { boardId: string; categoryId: string }) {
   try {
-    const { id }: GetCategoryById = await req.json();
+    const id = Number(params.categoryId);
+
     const category = await Categories.getCategoryById({ id });
+
     return NextResponse.json(category, { status: 200 });
   } catch (error) {
     console.error('[GET_CATEGORY_BY_ID_ERROR]', error);
-    return NextResponse.json({ error: 'Failed to fetch category' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to retrieve category' }, { status: 500 });
   }
 }

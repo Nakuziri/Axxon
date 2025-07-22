@@ -1,6 +1,10 @@
 /*
 THIS WHOLE CONTROLLER FILE SHOULD BE REVISED 
 TO ENSURE THAT CONTROLLERS WORK AS INTENDED
+
+controllers that need to be fixed: 
+-remove board members
+-get by id
 */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,14 +13,20 @@ import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/
 
 //has to be specifically setup like this due to working with dynamic route
 //lists all boards users is a member of
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-    const userId = Number(params.id);
-    const boards = await BoardMembers.listBoardsForUser({ user_id: userId });
+export async function GET(_req: NextRequest, params: { userId: string }) {
+  try{
+    const user_id = Number(params.userId);
+    const boards = await BoardMembers.listBoardsForUser({ user_id });
+    
     return NextResponse.json(boards, { status: 200 });
+  }catch(error){
+    console.error('[FETCH_BOARDS_DATA_ERROR]', error);
+    return NextResponse.json({error: 'failed to fetch boards'}, {status: 500});
+  }
 }
 
 //gets all board members
-export async function getAllMembersInBoard(req: NextRequest, { params }: {params: {boardId: string }}) {
+export async function getAllMembersInBoard(_req: NextRequest, params: {boardId: string }) {
   try{  
     const board_id = Number(params.boardId);
     const members = await BoardMembers.getAllMembersForBoard({ board_id });
@@ -35,8 +45,9 @@ export async function removeBoardMember(data: RemoveBoardMember) {
 }
 
 //needs req since its a POST
-export async function addBoardMembersByEmail(req: NextRequest) {
+export async function addBoardMembersByEmail(req: NextRequest, params: { boardId: string;}){
   const data: AddBoardMembersByEmail = await req.json();
+  data.board_id = Number(params.boardId)
   await BoardMembers.addMembersByEmail(data);
   return NextResponse.json({ message: 'Members added successfully' }, { status: 200 });
 }

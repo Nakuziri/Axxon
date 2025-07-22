@@ -3,22 +3,20 @@ import { getBoardById } from '@/lib/controllers/board/getById';
 import { updateBoardController } from '@/lib/controllers/board/update';
 import { deleteBoardController } from '@/lib/controllers/board/delete';
 import { NextRequest } from 'next/server';
-import { DeleteBoard } from '@/lib/models/types/boardTypes';
+
 
 
 //gets board by id
-//context allows you to bridge types from controllers 
-export async function GET(_req: NextRequest, { params }: { params: { boardId: string } }) {
-  return await getBoardById(Number(params.boardId));
+export async function GET(_req: NextRequest, context: { params: { boardId: string } }) {
+  return await getBoardById(_req, context.params);
 }
 
 //updates board by id
-export async function PATCH(req: NextRequest, { params }: { params: { boardId: string } }) {
-  return await updateBoardController(req, Number(params.boardId));
+export async function PATCH(req: NextRequest, context: { params: { boardId: string } }) {
+  return await updateBoardController(req, context.params);
 }
 
 //deletes board by id
-export async function DELETE(_req: NextRequest, { params }: { params: { boardId: string } }) {
-  const data: DeleteBoard = {id: Number(params.boardId)}
-  return await deleteBoardController(data);
+export async function DELETE(_req: NextRequest, context: { params: { boardId: string } }) {
+  return await deleteBoardController(_req, context.params );
 }

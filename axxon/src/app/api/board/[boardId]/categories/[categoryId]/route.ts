@@ -5,10 +5,10 @@ export async function PATCH(req: NextRequest, context: { params: { boardId: stri
   return await updateCategoryController(req, context.params);
 }
 
-export async function DELETE(req: NextRequest, context: { params: { boardId: string; categoryId: string }}) {
-  return await deleteCategoryController(req, context.params);
+export async function DELETE(_req: NextRequest, context: { params: { boardId: string; categoryId: string }}) {
+  return await deleteCategoryController(_req, context.params);
 }
 
-export async function GET(req: NextRequest, context: { params: { boardId: string; categoryId: string;}}) {
-    return await getCategoryByIdController(req, context.params);
+export async function GET(_req: NextRequest, context: { params: { boardId: string; categoryId: string;}}) {
+    return await getCategoryByIdController(_req, context.params);
 }

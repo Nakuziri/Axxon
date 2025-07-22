@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Categories } from '@/lib/models/categories';
-import type { CreateCategory, UpdateCategory, GetCategoryById } from '@/lib/models/types/categoryTypes';
+import type { CreateCategory, UpdateCategory } from '@/lib/models/types/categoryTypes';
 
 // creates categories
 export async function POST(req: NextRequest, context: { params: { boardId: string } }) {
@@ -38,7 +38,7 @@ export async function PATCH(req: NextRequest, params: { boardId: string; categor
 }
 
 // Deletes categories
-export async function DELETE(req: NextRequest, params: { boardId: string; categoryId: string }) {
+export async function DELETE(_req: NextRequest, params: { boardId: string; categoryId: string }) {
   try {
     const id = Number(params.categoryId);
     const deleted = await Categories.deleteCategory({ id });
@@ -51,7 +51,7 @@ export async function DELETE(req: NextRequest, params: { boardId: string; catego
 }
 
 // lists out categories
-export async function GET(req: NextRequest, params: { boardId: string; }) {
+export async function GET(_req: NextRequest, params: { boardId: string; }) {
   try{
     const board_id = Number(params.boardId);
     const categories = await Categories.listAllCategoriesInBoard({board_id});
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest, params: { boardId: string; }) {
 }
 
 // GetById
-export async function getCategoryByIdController(req: NextRequest, params: { boardId: string; categoryId: string }) {
+export async function getCategoryByIdController(_req: NextRequest, params: { boardId: string; categoryId: string }) {
   try {
     const id = Number(params.categoryId);
 

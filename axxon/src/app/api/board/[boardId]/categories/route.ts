@@ -5,6 +5,6 @@ export async function POST(req: NextRequest, context: { params: { boardId: strin
   return await createCategory(req, context);
 }
 
-export async function GET(req: NextRequest, context: { params: {boardId: string}}) {
-    return await listAllCategories(req, context.params);
+export async function GET(_req: NextRequest, context: { params: {boardId: string}}) {
+    return await listAllCategories(_req, context.params);
 }

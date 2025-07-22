@@ -1,8 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Board } from '@/lib/models/board';
-import { DeleteBoard } from '@/lib/models/types/boardTypes';
 
-export async function deleteBoardController(data: DeleteBoard) {
-  const result = await Board.deleteBoard({id: data.id});
-  return NextResponse.json({ success: !!result });
+
+export async function deleteBoardController(_req: NextRequest, params: {boardId: string}) {
+  try{
+    const id = Number(params.boardId);
+    const result = await Board.deleteBoard({id});
+   
+    return NextResponse.json(result, {status: 200});
+  }catch(error){
+    console.error('[DELETE_BOARD_ERROR]', error);
+    return NextResponse.json({error: 'failed to delete board'}, {status: 500});
+  }
 }

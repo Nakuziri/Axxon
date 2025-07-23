@@ -17,7 +17,6 @@ export class Categories {
     // Use provided position or fallback to total count
     const finalPosition = data.position ?? parseInt(positionCount?.count as string, 10);
 
-
     // Insert category
     const [category] = await knex('categories')
       .insert({
@@ -63,5 +62,5 @@ export class Categories {
 
   static getCategoryById = async (data: GetCategoryById): Promise<CategoryBaseData | null> =>{
     return await knex('categories').where({id: data.id}).first() || null
-  }
+  };
 }

@@ -1,5 +1,3 @@
-import { Board } from "../board";
-
 export type BoardBaseData = {
   id: number;
   name: string;

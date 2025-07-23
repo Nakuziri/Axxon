@@ -1,10 +1,12 @@
-import GoogleLoginButton from "@/components/ui/GoogleLoginButton";
+'use client'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-export default function Home() {
-  return (
-    <>
-      <h1 className='text-[50px]'>landing!</h1>
-      <GoogleLoginButton/>
-    </>
-  );
+export default function RootRedirect() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace('/landing') // or '/dashboard'
+  }, [router])
+
 }

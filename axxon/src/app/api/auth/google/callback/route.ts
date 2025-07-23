@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     const token = jwt.sign({ id: user.id, email: user.email, name: user.first_name }, jwtSecret, { expiresIn: '7d' });
 
     // Set cookie or redirect with token
-    const response = NextResponse.redirect('http://localhost:3000/main'); // your frontend main page
+    const response = NextResponse.redirect('http://localhost:3000/dashboard'); // your frontend main page
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

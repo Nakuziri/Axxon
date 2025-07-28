@@ -6,7 +6,7 @@ import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/
 //lists all boards users is a member of
 export async function GET(_req: NextRequest, params: { id: string }) {
   try{
-    const user_id = Number(params.id);
+    const user_id =  Number(params.id);
     const boards = await BoardMembers.listBoardsForUser({ user_id });
     
     return NextResponse.json(boards, { status: 200 });

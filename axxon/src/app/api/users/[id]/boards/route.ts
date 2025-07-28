@@ -1,4 +1,3 @@
-// app/api/boardmembers/user/[userId]/route.ts
 //lists boards users are in
 import {GET as listAllBoardsForUsers} from '@/lib/controllers/boardMembers/boardMemberControllers'
 import { NextRequest } from 'next/server';

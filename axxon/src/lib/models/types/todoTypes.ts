@@ -1,3 +1,5 @@
+import { LabelBaseData } from "./labelTypes";
+
 export type TodoBaseData = {
     id: number
     board_id: number
@@ -22,3 +24,4 @@ export type GetTodoByCompletionData = Pick<TodoBaseData, 'is_complete'>;
 export type GetTodoByAssigneeData = Pick<TodoBaseData, 'assignee_id' | 'board_id'>;
 export type GetTodoByStatusData = Pick<TodoBaseData, 'category_id' | 'board_id'>;
 export type SearchTodoByTitle = Pick<TodoBaseData,'board_id'> & {keyword: string}
+export type TodoWithLabels = TodoBaseData & LabelBaseData;

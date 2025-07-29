@@ -2,21 +2,48 @@ import knex from '@/lib/db/db'
 import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData, GetTodoByStatusData, SearchTodoByTitle} from './types/todoTypes'
 
 export class Todos {
-    static createTodo = async(data: CreateTodoData): Promise<TodoBaseData> => {
-        const[todo] = await knex('todos')
-        .insert({
-            board_id: data.board_id,
-            title: data.title,
-            description: data.description,
-            due_date: data.due_date,
-            assignee_id: data.assignee_id,
-            priority: data.priority,
-            category_id: data.category_id,
-            is_complete: data.is_complete ?? false//default to false if undefined
-        })
-        .returning('*')
+    
+    static createTodo = async (data: CreateTodoData): Promise<TodoBaseData> => {
+    const {
+        board_id,
+        title,
+        description,
+        due_date,
+        assignee_id,
+        priority,
+        category_id,
+        is_complete
+    } = data;
 
-        return todo;
+    let finalCategoryId = category_id;
+
+    if (!finalCategoryId) {
+        const defaultCategory = await knex('categories')
+        .where({ board_id })
+        .orderBy('position', 'asc')
+        .first();
+
+        if (!defaultCategory) {
+        throw new Error(`No default category found for board_id: ${board_id}`);
+        }
+
+        finalCategoryId = defaultCategory.id;
+    }
+
+    const [todo] = await knex('todos')
+        .insert({
+        board_id,
+        title,
+        description: description ?? null,
+        due_date: due_date ?? null,
+        assignee_id: assignee_id ?? null,
+        priority: priority ?? null,
+        category_id: finalCategoryId,
+        is_complete: is_complete ?? false
+        })
+        .returning('*');
+
+    return todo;
     };
 
     static deleteTodo = async(data: DeleteTodoData): Promise<number> => {

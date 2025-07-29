@@ -4,17 +4,27 @@ export type TodoBaseData = {
     id: number
     board_id: number
     title: string
-    description: string
-    due_date: string
-    assignee_id: number
-    priority: number
-    category_id: number
-    is_complete: boolean
-    created_at: string
-    updated_at: string
+    description?: string
+    due_date?: string
+    assignee_id?: number
+    priority?: number
+    category_id?: number
+    is_complete?: boolean
+    created_at?: string
+    updated_at?: string
 };
 
-export type CreateTodoData = Omit<TodoBaseData, 'id' | 'created_at' | 'updated_at'>;
+export type CreateTodoData = {
+  board_id: number;
+  title: string;
+  description?: string;
+  due_date?: string;
+  assignee_id?: number;
+  priority?: number;
+  category_id?: number;
+  is_complete?: boolean;
+};
+
 export type DeleteTodoData = Pick<TodoBaseData, 'id'>;
 export type UpdateTodoData = Partial<Pick<TodoBaseData, 'title' | 'description' | 'due_date' | 'assignee_id' | 'priority' | 'category_id' | 'is_complete'>> & { id: number };
 export type ListAllTodosData = Pick<TodoBaseData, 'board_id'>

@@ -14,6 +14,10 @@ export async function POST(req: NextRequest, params: { boardId: string }) {
     return NextResponse.json(todo, { status: 201 });
   } catch (error) {
     console.error('[CREATE_TODO_ERROR]', error);
+    if (error instanceof Error) {
+    console.error('Error message:', error.message);
+    console.error('Stack trace:', error.stack);
+  }
     return NextResponse.json({ error: 'Failed to create todo' }, { status: 500 });
   }
 }

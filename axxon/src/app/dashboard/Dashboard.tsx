@@ -6,7 +6,7 @@ import { getUserId } from '@/lib/api/getUserId'
 import { fetchBoards } from '@/lib/api/getBoards'
 import { deleteBoardById } from '@/lib/api/deleteBoardById'
 import { useState } from 'react'
-import EditBoardModal from '@/components/ui/EditBoardModal'
+import EditBoardModal from '@/app/dashboard/EditBoardModal'
 
 export default function Dashboard() {
   const queryClient = useQueryClient()

@@ -1,4 +1,4 @@
-import Dashboard from './dashboard'
+import Dashboard from './Dashboard'
 import CreateBoardForm from './boardForm'
 
 export default function Page() {

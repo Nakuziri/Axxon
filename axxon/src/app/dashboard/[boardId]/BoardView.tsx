@@ -9,7 +9,7 @@ import { fetchTodosWithLabels } from '@/lib/api/getTodosWithLabels'
 import { CategoryBaseData } from '@/lib/models/types/categoryTypes'
 import { TodoWithLabels } from '@/lib/models/types/todoTypes'
 import { useMemo } from 'react'
-import Modal from '@/components/ui/Modal';
+import Modal from '@/components/ui/CreateTodoModal';
 import AddTodoForm from './createTodo';
 
 

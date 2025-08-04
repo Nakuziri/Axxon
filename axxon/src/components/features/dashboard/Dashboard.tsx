@@ -1,16 +1,29 @@
 'use client'
 
+/* libraries */ 
 import Link from 'next/link'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+/* api helpers */
 import { getUserId } from '@/lib/api/getUserId'
 import { fetchBoards } from '@/lib/api/getBoards'
 import { deleteBoardById } from '@/lib/api/deleteBoardById'
-import { useState } from 'react'
-import EditBoardModal from '@/app/dashboard/EditBoardModal'
+
+
+ /* Components */ 
+import BoardOptionsModal from '@/components/features/dashboard/BoardOptionsModal'
+import InviteMembersModal from '@/components/features/dashboard/InviteMembersModal'
+import EditBoardModal from '@/components/features/dashboard/EditBoardModal'
+
+/* Types */
+import { UpdateBoard } from '@/lib/models/types/boardTypes'
 
 export default function Dashboard() {
   const queryClient = useQueryClient()
-  const [editingBoard, setEditingBoard] = useState(null)
+  const [editingBoard, setEditingBoard] = useState<UpdateBoard | null>(null)
+  const [selectedBoard, setSelectedBoard] = useState<UpdateBoard | null>(null)
+  const [isInviteModalOpen, setInviteModalOpen] = useState(false)
 
   const {
     data: id,
@@ -66,21 +79,10 @@ export default function Dashboard() {
                 </Link>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setEditingBoard(board)}
-                    className="text-sm text-blue-600 hover:underline"
+                    onClick={() => setSelectedBoard(board)}
+                    className="text-sm text-gray-700 hover:underline"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      const confirmed = confirm('Are you sure you want to delete this board?')
-                      if (confirmed) {
-                        deleteMutation.mutate(board.id)
-                      }
-                    }}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Delete
+                    Options
                   </button>
                 </div>
               </div>
@@ -99,6 +101,21 @@ export default function Dashboard() {
             }
             setEditingBoard(null)
           }}
+        />
+      )}
+      {selectedBoard && (
+        <BoardOptionsModal
+          board={selectedBoard}
+          onClose={() => setSelectedBoard(null)}
+          onEdit={() => setEditingBoard(selectedBoard)}
+          onDelete={() => deleteMutation.mutate(selectedBoard.id)}
+          onInvite={() => setInviteModalOpen(true)}
+        />
+      )}
+      {isInviteModalOpen && selectedBoard && (
+        <InviteMembersModal
+          boardId={Number(selectedBoard.id)}
+          onClose={() => setInviteModalOpen(false)}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
-import Dashboard from './Dashboard'
-import CreateBoardForm from './boardForm'
+import Dashboard from '../../components/features/dashboard/Dashboard'
+import CreateBoardForm from '../../components/features/dashboard/boardForm'
 
 export default function Page() {
   return( 

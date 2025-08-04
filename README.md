@@ -69,7 +69,7 @@ cp .env.example .env
 
 # Run migrations and seed data
 npm run migrate:make
-npm run seed
+npm run migrate:latest
 
 # Start Development 
 pnpm dev

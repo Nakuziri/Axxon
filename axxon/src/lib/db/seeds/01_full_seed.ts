@@ -1,7 +1,7 @@
 import type { Knex } from "knex";
 
 export async function seed(knex: Knex): Promise<void> {
-  // Clear existing data in reverse FK order
+  // Clear in reverse FK order
   await knex('todo_labels').del();
   await knex('todos').del();
   await knex('labels').del();
@@ -12,163 +12,147 @@ export async function seed(knex: Knex): Promise<void> {
 
   // Users
   const users = [
-    {
-      id: 1,
-      first_name: "Xavier",
-      last_name: "Campos",
-      email: "xaviercampos2425@gmail.com",
-      avatar_url: null,
-    },
-    {
-      id: 2,
-      first_name: "Alice",
-      last_name: "Johnson",
-      email: "alice.johnson@example.com",
-      avatar_url: null,
-    },
-    {
-      id: 3,
-      first_name: "Bob",
-      last_name: "Smith",
-      email: "bob.smith@example.com",
-      avatar_url: null,
-    },
-    {
-      id: 4,
-      first_name: "Carol",
-      last_name: "Williams",
-      email: "carol.williams@example.com",
-      avatar_url: null,
-    },
+    { first_name: "Xavier", last_name: "Campos", email: "xaviercampos2425@gmail.com", avatar_url: null },
+    { first_name: "Alice", last_name: "Johnson", email: "alice.johnson@example.com", avatar_url: null },
+    { first_name: "Bob", last_name: "Smith", email: "bob.smith@example.com", avatar_url: null },
+    { first_name: "Carol", last_name: "Williams", email: "carol.williams@example.com", avatar_url: null },
   ];
-  await knex('users').insert(users);
+  const insertedUsers = await knex('users').insert(users).returning(['id', 'email']);
 
-  // Boards - 12 for Xavier, 3 others spread
-  const boards = [
-    // Xavier's boards
-    { id: 1, name: "Xavier's Main Board", created_by: 1 },
-    { id: 2, name: "Work Projects", created_by: 1 },
-    { id: 3, name: "Personal ToDos", created_by: 1 },
-    { id: 4, name: "Learning Goals", created_by: 1 },
-    { id: 5, name: "Fitness Plans", created_by: 1 },
-    { id: 6, name: "Travel Itinerary", created_by: 1 },
-    { id: 7, name: "Home Renovations", created_by: 1 },
-    { id: 8, name: "Shopping List", created_by: 1 },
-    { id: 9, name: "Books to Read", created_by: 1 },
-    { id: 10, name: "Music Projects", created_by: 1 },
-    { id: 11, name: "Events Planning", created_by: 1 },
-    { id: 12, name: "Side Hustle Ideas", created_by: 1 },
+  const userMap = Object.fromEntries(insertedUsers.map(u => [u.email, u.id]));
+  const xavierId = userMap["xaviercampos2425@gmail.com"];
 
-    // Other users' boards
-    { id: 13, name: "Alice's Board", created_by: 2 },
-    { id: 14, name: "Bob's Board", created_by: 3 },
-    { id: 15, name: "Carol's Board", created_by: 4 },
-  ];
-  await knex('boards').insert(boards);
+  // Boards (100 total, 30+ to Xavier)
+  const boardColors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A8', '#A833FF', '#33FFF2'];
+  const boards = [];
 
-  // Board Members: Xavier is member on all his boards + Alice and Bob on some
-  const boardMembers = [
-    // Xavier on his boards
-    ...boards.filter(b => b.created_by === 1).map(b => ({ board_id: b.id, user_id: 1 })),
+  for (let i = 0; i < 100; i++) {
+    const created_by = i < 30 ? xavierId : insertedUsers[i % insertedUsers.length].id;
+    boards.push({
+      name: `Board ${i + 1}`,
+      created_by,
+      color: boardColors[i % boardColors.length],
+    });
+  }
 
-    // Alice on board 1 and 13
-    { board_id: 1, user_id: 2 },
-    { board_id: 13, user_id: 2 },
+  const insertedBoards = await knex('boards').insert(boards).returning(['id', 'created_by']);
 
-    // Bob on boards 2 and 14
-    { board_id: 2, user_id: 3 },
-    { board_id: 14, user_id: 3 },
+  // Board members with deduplication
+  const boardMembers = [];
 
-    // Carol on board 15 only
-    { board_id: 15, user_id: 4 },
-  ];
+  for (const board of insertedBoards) {
+    const membersSet = new Set<string>();
+
+    // Add owner
+    boardMembers.push({ board_id: board.id, user_id: board.created_by });
+    membersSet.add(`${board.id}_${board.created_by}`);
+
+    // Add Xavier as member if not owner and 20% chance
+    if (board.created_by !== xavierId && Math.random() < 0.2) {
+      if (!membersSet.has(`${board.id}_${xavierId}`)) {
+        boardMembers.push({ board_id: board.id, user_id: xavierId });
+        membersSet.add(`${board.id}_${xavierId}`);
+      }
+    }
+
+    // Add 1-2 random collaborators (excluding owner)
+    const otherUsers = insertedUsers.filter(u => u.id !== board.created_by);
+    const collaboratorCount = Math.floor(Math.random() * 2) + 1;
+    for (let i = 0; i < collaboratorCount; i++) {
+      const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+      const key = `${board.id}_${randomUser.id}`;
+      if (!membersSet.has(key)) {
+        boardMembers.push({ board_id: board.id, user_id: randomUser.id });
+        membersSet.add(key);
+      }
+    }
+  }
   await knex('board_members').insert(boardMembers);
 
-  // Categories: 4 per board, with positions 1-4, random colors
-  const categoryColors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A8", "#A833FF", "#33FFF2"];
-  const categories: Array<{
-    id?: number;
-    board_id: number;
-    name: string;
-    color: string;
-    position: number;
-    is_done: boolean;
-  }> = [];
+  // Categories: 4 per board
+  const categoryColors = boardColors;
+  const categories = [];
 
-  let categoryId = 1;
-  for (const board of boards) {
+  for (const board of insertedBoards) {
     for (let pos = 1; pos <= 4; pos++) {
       categories.push({
-        id: categoryId++,
         board_id: board.id,
-        name: `Category ${pos} of Board ${board.id}`,
+        name: `Category ${pos}`,
         color: categoryColors[pos % categoryColors.length],
         position: pos,
-        is_done: pos === 4, // last category is "done"
+        is_done: pos === 4,
       });
     }
   }
-  await knex('categories').insert(categories);
 
-  // Labels: 8 total, spread across boards (random colors)
-  const labels = [
-    { id: 1, board_id: 1, name: "Urgent", color: "#FF0000" },
-    { id: 2, board_id: 1, name: "Bug", color: "#FF6600" },
-    { id: 3, board_id: 2, name: "Feature", color: "#00FF00" },
-    { id: 4, board_id: 2, name: "Backend", color: "#0000FF" },
-    { id: 5, board_id: 3, name: "Frontend", color: "#FF00FF" },
-    { id: 6, board_id: 3, name: "Low Priority", color: "#AAAAAA" },
-    { id: 7, board_id: 4, name: "Research", color: "#00FFFF" },
-    { id: 8, board_id: 4, name: "Testing", color: "#FFFF00" },
-  ];
-  await knex('labels').insert(labels);
+  const insertedCategories = await knex('categories').insert(categories).returning(['id', 'board_id']);
 
-  // Todos: 5 todos per category, assigned to Xavier if possible
-  const todos: Array<{
-    id?: number;
-    board_id: number;
-    title: string;
-    description: string;
-    due_date: Date | null;
-    assignee_id: number | null;
-    priority: number;
-    category_id: number;
-    is_complete: boolean;
-  }> = [];
+  // Labels: 5 per board
+  const labels = [];
+  for (const board of insertedBoards) {
+    for (let i = 0; i < 5; i++) {
+      labels.push({
+        board_id: board.id,
+        name: `Label ${i + 1}`,
+        color: categoryColors[i % categoryColors.length],
+      });
+    }
+  }
 
-  let todoId = 1;
-  for (const category of categories) {
-    for (let i = 1; i <= 5; i++) {
+  const insertedLabels = await knex('labels').insert(labels).returning(['id', 'board_id']);
+
+  // Todos: 6 per category (2400+ todos)
+  const todos = [];
+  for (const [i, cat] of insertedCategories.entries()) {
+    for (let j = 1; j <= 6; j++) {
       todos.push({
-        id: todoId++,
-        board_id: category.board_id,
-        title: `Todo ${i} in Cat ${category.id} (Board ${category.board_id})`,
-        description: `This is the description for todo ${i} in category ${category.name}`,
-        due_date: new Date(Date.now() + i * 24 * 60 * 60 * 1000), // i days from now
-        assignee_id: 1, // Xavier
-        priority: (i % 3) + 1,
-        category_id: category.id!,
-        is_complete: i === 5, // last todo marked complete
+        board_id: cat.board_id,
+        title: `Task ${j} in Category ${cat.id}`,
+        description: `Auto-generated todo ${j} under category ${cat.id}`,
+        due_date: new Date(Date.now() + j * 86400000),
+        assignee_id: xavierId,
+        priority: (j % 3) + 1,
+        category_id: cat.id,
+        is_complete: j === 6,
       });
     }
   }
-  await knex('todos').insert(todos);
 
-  // Todo_Labels: randomly assign 1-3 labels per todo from labels of the same board
-  const todoLabels: Array<{ todo_id: number; label_id: number }> = [];
+  const insertedTodos = await knex('todos').insert(todos).returning(['id', 'board_id']);
 
-  for (const todo of todos) {
-    // get labels for the board of this todo
-    const boardLabels = labels.filter(l => l.board_id === todo.board_id);
-    // shuffle labels
-    const shuffled = boardLabels.sort(() => 0.5 - Math.random());
-    // take 1 to 3 labels
+  // Todo Labels: 1–3 per todo, from same board
+  const todoLabels = [];
+
+  for (const [i, todo] of insertedTodos.entries()) {
+    const boardId = todo.board_id;
+    const labelPool = insertedLabels.filter(l => l.board_id === boardId);
     const count = Math.floor(Math.random() * 3) + 1;
-    for (let i = 0; i < count && i < shuffled.length; i++) {
-    todoLabels.push({ todo_id: todo.id!, label_id: shuffled[i].id });
+    const shuffled = labelPool.sort(() => 0.5 - Math.random()).slice(0, count);
+
+    for (const label of shuffled) {
+      todoLabels.push({ todo_id: todo.id, label_id: label.id });
     }
   }
+
   await knex('todo_labels').insert(todoLabels);
 
-  console.log('Database seeded successfully!');
+  console.log(`🌱 Seed complete:
+  - Users: ${insertedUsers.length}
+  - Boards: ${insertedBoards.length}
+  - Categories: ${insertedCategories.length}
+  - Labels: ${insertedLabels.length}
+  - Todos: ${insertedTodos.length}
+  - TodoLabels: ${todoLabels.length}`);
 }
+
+export async function rollbackSeed(knex: Knex): Promise<void> {
+  // Delete in reverse order of dependencies to avoid FK errors
+  await knex('todo_labels').del();
+  await knex('todos').del();
+  await knex('labels').del();
+  await knex('categories').del();
+  await knex('board_members').del();
+  await knex('boards').del();
+  await knex('users').del();
+}
+  console.log("🌱 Rollback complete.");

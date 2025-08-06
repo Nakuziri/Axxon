@@ -3,6 +3,7 @@ export type LabelBaseData = {
     board_id: number
     name: string
     color: string
+    labels?: LabelBaseData[]
 };
 
 export type CreateLabelData = Pick<LabelBaseData, 'name' | 'color' | 'board_id'>;

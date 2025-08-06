@@ -4,7 +4,7 @@ import { fetchBoards } from '@/lib/api/getBoards'
 import { fetchCategories } from '@/lib/api/getCategories'
 import { fetchTodos } from '@/lib/api/getTodos'
 import { fetchLabels } from '@/lib/api/getLabels'
-import BoardView from './BoardView'
+import BoardView from '../../../components/features/boardView/BoardView'
 import { notFound } from 'next/navigation' 
 
 type Props = {

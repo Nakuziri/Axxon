@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Todos } from '@/lib/models/todos';
-import type { CreateTodoData, UpdateTodoData } from '@/lib/models/types/todoTypes';
+import type { CreateTodoData, UpdateTodoData } from '@/lib/types/todoTypes';
 
 // Create Todo (POST /board/[boardId]/todos)
 export async function POST(req: NextRequest, params: { boardId: string }) {

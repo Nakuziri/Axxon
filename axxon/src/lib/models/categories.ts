@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db';
-import type { CategoryBaseData, CreateCategory, UpdateCategory, DeleteCategory, ListCategoriesForBoard, GetCategoryById } from './types/categoryTypes';
+import type { CategoryBaseData, CreateCategory, UpdateCategory, DeleteCategory, ListCategoriesForBoard, GetCategoryById } from '../types/categoryTypes';
 import { getAvailableColor } from '../utils/colorPicker';
 
 export class Categories {

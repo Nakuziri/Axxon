@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Labels } from '@/lib/models/labels';
-import type { CreateLabelData, UpdateLabelData } from '@/lib/models/types/labelTypes';
+import type { CreateLabelData, UpdateLabelData } from '@/lib/types/labelTypes';
 
 // Create Label (POST /board/[boardId]/labels)
 export async function POST(req: NextRequest, params: { boardId: string } ) {

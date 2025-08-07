@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Categories } from '@/lib/models/categories';
-import type { CreateCategory, UpdateCategory } from '@/lib/models/types/categoryTypes';
+import type { CreateCategory, UpdateCategory } from '@/lib/types/categoryTypes';
 
 // creates categories
 export async function POST(req: NextRequest, context: { params: { boardId: string } }) {

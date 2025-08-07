@@ -17,7 +17,7 @@ import InviteMembersModal from '@/components/features/dashboard/InviteMembersMod
 import EditBoardModal from '@/components/features/dashboard/EditBoardModal'
 
 /* Types */
-import { UpdateBoard } from '@/lib/models/types/boardTypes'
+import { UpdateBoard } from '@/lib/types/boardTypes'
 
 export default function Dashboard() {
   const queryClient = useQueryClient()
@@ -49,7 +49,6 @@ export default function Dashboard() {
   const deleteMutation = useMutation({
     mutationFn: (boardId: string) => deleteBoardById(boardId),
     onSuccess: () => {if(id)queryClient.invalidateQueries({ queryKey: ['boards', id] })},
-    
   })
 
   if (isUserLoading || isBoardsLoading) return <div>Loading dashboard...</div>

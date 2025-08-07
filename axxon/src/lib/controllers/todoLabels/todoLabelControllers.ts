@@ -4,7 +4,7 @@ import type {
   AddLabelToTodo,
   RemoveLabelFromTodo,
   GetLabelsOnTodo,
-} from '@/lib/models/types/todoLabelTypes';
+} from '@/lib/types/todoLabelTypes';
 
 // Add a label to a todo (POST /board/[boardId]/todos/[todoId]/labels)
 export async function POST(_req: NextRequest, params: { boardId: string; todoId: string; labelId: string }) {

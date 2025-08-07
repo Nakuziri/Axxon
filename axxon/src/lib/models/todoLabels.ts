@@ -1,7 +1,7 @@
 import knex from '@/lib/db/db'
-import { AddLabelToTodo, FilterTodosByLabel, GetLabelsOnTodo, RemoveLabelFromTodo, TodoLabelsBaseData } from './types/todoLabelTypes'
-import { LabelBaseData } from './types/labelTypes';
-import { TodoBaseData } from './types/todoTypes';
+import { AddLabelToTodo, FilterTodosByLabel, GetLabelsOnTodo, RemoveLabelFromTodo, TodoLabelsBaseData } from '../types/todoLabelTypes'
+import { LabelBaseData } from '../types/labelTypes';
+import { TodoBaseData } from '../types/todoTypes';
 
 //class for handling joined todos and labels
 export class TodoLabels { 

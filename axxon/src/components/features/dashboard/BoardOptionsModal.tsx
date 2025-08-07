@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import {  UpdateBoard } from "@/lib/models/types/boardTypes";
+import {  UpdateBoard } from "@/lib/types/boardTypes";
 
 type BoardOptionsModalProps = {
   board: UpdateBoard;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoardMembers } from '@/lib/models/boardMembers';
-import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/models/types/boardMemberTypes';
+import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/types/boardMemberTypes';
 
 //has to be specifically setup like this due to working with dynamic route
 //lists all boards users is a member of

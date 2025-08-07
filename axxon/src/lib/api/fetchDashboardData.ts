@@ -1,4 +1,4 @@
-import { BoardBaseData } from '@/lib/models/types/boardTypes';
+import { BoardBaseData } from '@/lib/types/boardTypes';
 
 export type DashboardData = {
   id: string | null;

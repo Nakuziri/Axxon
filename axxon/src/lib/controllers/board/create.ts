@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { Board } from '@/lib/models/board'; 
-import { BoardCreation } from '@/lib/models/types/boardTypes';
+import { BoardCreation } from '@/lib/types/boardTypes';
 import jwt from 'jsonwebtoken';
 
 export async function createBoardController(req: NextRequest) {

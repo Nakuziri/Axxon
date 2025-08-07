@@ -3,7 +3,7 @@
 //this component is a droppable column that holds draggable todos
 //it renders all of the boards categories
 import { useDroppable } from '@dnd-kit/core'
-import { TodoWithLabels } from '@/lib/models/types/todoTypes'
+import { TodoWithLabels } from '@/lib/types/todoTypes'
 import DraggableTodo from './DraggableTodo'
 
 export default function DroppableColumn({

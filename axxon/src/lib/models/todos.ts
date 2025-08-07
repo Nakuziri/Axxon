@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db'
-import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData, GetTodoByStatusData, SearchTodoByTitle} from './types/todoTypes'
+import { CreateTodoData, DeleteTodoData, GetTodoByIdData, GetTodoByNameData, ListAllTodosData, TodoBaseData, UpdateTodoData, GetTodoByCompletionData, GetTodoByAssigneeData, GetTodoByStatusData, SearchTodoByTitle} from '../types/todoTypes'
 
 export class Todos {
     

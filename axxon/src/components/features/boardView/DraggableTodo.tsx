@@ -2,8 +2,8 @@
 
 import { useDraggable } from '@dnd-kit/core'
 import { useRef } from 'react'
-import { TodoWithLabels } from '@/lib/models/types/todoTypes'
-import { LabelBaseData } from '@/lib/models/types/labelTypes'
+import { TodoWithLabels } from '@/lib/types/todoTypes'
+import { LabelBaseData } from '@/lib/types/labelTypes'
 
 export default function DraggableTodo({
   todo,

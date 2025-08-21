@@ -1,11 +1,11 @@
-import Dashboard from '../../components/features/dashboard/Dashboard'
-import CreateBoardForm from '../../components/features/dashboard/boardForm'
+import Calendar from '@/components/common/calendar'
 
 export default function Page() {
   return( 
     <>
-      <Dashboard/>
-      <CreateBoardForm/>
+      <div className='flex'>
+        <Calendar todosByDate={{}} />
+      </div>
     </>
   )
 }

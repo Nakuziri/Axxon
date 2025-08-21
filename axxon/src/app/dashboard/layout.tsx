@@ -1,18 +1,26 @@
+"use client";
+import { useState } from "react";
+import Sidebar from "@/components/ui/sideBar";
+import { Plus, LayoutDashboard } from "lucide-react";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 h-full fixed top-0 left-0 bg-gray-600 text-white p-4 z-20 ">
-        <div className="text-xl font-bold mb-6">Sidebar</div>
-        {/* Sidebar links... */}
-      </aside>
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Main content */}
-      <main className="ml-64 flex-1 h-full overflow-hidden">
+      <main
+        className={`transition-all duration-300 h-screen w-full overflow-auto ${
+          collapsed ? "ml-16" : "ml-64"
+        }`}
+      >
         {children}
       </main>
     </div>

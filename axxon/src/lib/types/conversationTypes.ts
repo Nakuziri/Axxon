@@ -1,7 +1,7 @@
 export type ConversationsBaseData = {
     id: number;
     board_id: number;
-    is_group: Boolean;
+    is_group: boolean;
     title: string | null;
     created_at: string;
 };

@@ -23,35 +23,44 @@ export default function UpdateTodoModal({ todo, boardId, onClose }: UpdateTodoMo
   const queryClient = useQueryClient()
 
   // Convert boardId and todo.id to numbers here to prevent NaN errors
-    const numericBoardId = !isNaN(Number(boardId)) ? Number(boardId) : null
-    const numericTodoId = !isNaN(Number(todo.id)) ? Number(todo.id) : null
+const numericBoardId = !isNaN(Number(boardId)) ? Number(boardId) : null;
+const numericTodoId = !isNaN(Number(todo.id)) ? Number(todo.id) : null;
 
-    if (numericBoardId === null || numericTodoId === null) {
-    console.error('Invalid boardId or todoId', { boardId, todoId: todo.id })
-    return null // Optionally render a fallback UI or error message
-    }
-
-
+// Always call hooks
 const updateMutation = useMutation({
   mutationFn: (updatedData: any) =>
-    updateTodoById(numericBoardId, numericTodoId, updatedData),
+    numericBoardId !== null && numericTodoId !== null
+      ? updateTodoById(numericBoardId, numericTodoId, updatedData)
+      : Promise.reject('Invalid IDs'),
   onSuccess: () => {
     if (numericBoardId !== null) {
-      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] })
+      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] });
     }
-    onClose()
+    onClose();
   },
-})
+});
 
 const deleteMutation = useMutation({
-  mutationFn: () => deleteTodoById(numericBoardId, numericTodoId),
+  mutationFn: () =>
+    numericBoardId !== null && numericTodoId !== null
+      ? deleteTodoById(numericBoardId, numericTodoId)
+      : Promise.reject('Invalid IDs'),
   onSuccess: () => {
     if (numericBoardId !== null) {
-      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] })
+      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] });
     }
-    onClose()
+    onClose();
   },
-})
+});
+
+// Render fallback UI for invalid IDs
+if (numericBoardId === null || numericTodoId === null) {
+  return (
+    <div className="fixed inset-0 flex justify-center items-center">
+      <p className="text-red-600">Invalid board or todo ID.</p>
+    </div>
+  );
+}
 
 
   const handleSubmit = (e: React.FormEvent) => {

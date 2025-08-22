@@ -2,6 +2,7 @@ import knex from '@/lib/db/db'
 import { AddLabelToTodo, FilterTodosByLabel, GetLabelsOnTodo, RemoveLabelFromTodo, TodoLabelsBaseData } from '../types/todoLabelTypes'
 import { LabelBaseData } from '../types/labelTypes';
 import { TodoBaseData } from '../types/todoTypes';
+import { Labels } from './labels';
 
 //class for handling joined todos and labels
 export class TodoLabels { 
@@ -42,4 +43,37 @@ export class TodoLabels {
         .where({'todo_labels.label_id': data.label_id})
         .select('todos.*');
     };
+
+
+  static async getTodosWithLabels(boardId: number): Promise<(TodoBaseData & { labels: LabelBaseData[] })[]> {
+    // 1. Fetch todos for this board
+    const todos = await knex('todos')
+      .where({ board_id: boardId })
+      .select('*');
+      
+    if (!todos.length) return [];
+
+    const todoIds = todos.map(todo => todo.id);
+
+    // 2. Fetch todo-label relations
+    const todoLabels = await knex('todo_labels').whereIn('todo_id', todoIds);
+
+    // 3. Fetch all labels for this board using Labels model
+    const allLabels = await Labels.listAllLabelsInBoard({ board_id: boardId });
+
+    // 4. Build a label map for quick lookup
+    const labelMap = allLabels.reduce((acc, label) => {
+      acc[label.id] = label;
+      return acc;
+    }, {} as Record<number, LabelBaseData>);
+
+    // 5. Attach labels to each todo
+    return todos.map(todo => ({
+      ...todo,
+      labels: todoLabels
+        .filter(rel => rel.todo_id === todo.id)
+        .map(rel => labelMap[rel.label_id])
+        .filter(Boolean),
+    }));
+  }
 }

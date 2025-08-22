@@ -32,20 +32,50 @@ export class Categories {
   };
 
   static updateCategory = async (data: UpdateCategory): Promise<CategoryBaseData> => {
-    const {id, ...updateData } = data;
+    const { id, board_id, position, ...rest } = data;
 
-    // Add updated_at timestamp to updateData
-    const updateWithTimestamp = {
-      ...updateData,
-      updated_at: knex.fn.now(), // This sets it to the current timestamp
-    };
-        const [category] = await knex('categories')
-         .where({id})
-         .update(updateWithTimestamp)
-         .returning('*')
-        
-        return category;
+    // Start a transaction to safely handle position shifts
+    return await knex.transaction(async (trx) => {
+      // Shift positions only if a new position is provided
+      if (position !== undefined) {
+        // Get all other categories in the same board
+        const otherCategories = await trx('categories')
+          .where({ board_id })
+          .andWhereNot({ id })
+          .orderBy('position', 'asc');
+
+        const newPositions: Record<number, number> = {};
+
+        // Recalculate positions to make room for the updated category
+        let currentPos = 1;
+        for (const cat of otherCategories) {
+          if (currentPos === position) currentPos++; // skip the new position
+          newPositions[cat.id] = currentPos;
+          currentPos++;
+        }
+
+        // Update other categories' positions
+        for (const [catId, newPos] of Object.entries(newPositions)) {
+          await trx('categories')
+            .where({ id: Number(catId) })
+            .update({ position: newPos });
+        }
+      }
+
+      // Update the target category
+      const [updatedCategory] = await trx('categories')
+        .where({ id })
+        .update({
+          ...rest,
+          ...(position !== undefined ? { position } : {}),
+          updated_at: trx.fn.now(),
+        })
+        .returning('*');
+
+      return updatedCategory;
+    });
   };
+
 
   static deleteCategory = async (data: DeleteCategory): Promise<number> =>{
         return await knex('categories')

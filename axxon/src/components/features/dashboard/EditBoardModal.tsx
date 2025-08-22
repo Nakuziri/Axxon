@@ -3,22 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { updateBoardById } from '@/lib/api/updateBoardById'
+import type { UpdateBoard } from '@/lib/types/boardTypes'
 
-export default function EditBoardModal({ board, onClose, onSuccess }) {
-  const [name, setName] = useState(board.name)
+type EditBoardModalProps = {
+  board: UpdateBoard
+  onClose: () => void
+  onSuccess: () => void
+}
+
+export default function EditBoardModal({ board, onClose, onSuccess }: EditBoardModalProps) {
+  // Default to empty string or black if undefined
+  const [name, setName] = useState(board.name || '')
   const [color, setColor] = useState(board.color || '#000000')
 
   const updateMutation = useMutation({
-    mutationFn: () => updateBoardById(board.id, { name, color }),
+    mutationFn: () => updateBoardById(String(board.id), { name, color }),
     onSuccess,
   })
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        onClose()
-      } else if (e.key === 'Enter') {
-        e.preventDefault() // prevent form submission if inside a form
+      if (e.key === 'Escape') onClose()
+      else if (e.key === 'Enter') {
+        e.preventDefault()
         updateMutation.mutate()
       }
     }
@@ -46,9 +53,7 @@ export default function EditBoardModal({ board, onClose, onSuccess }) {
           onChange={(e) => setColor(e.target.value)}
         />
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="text-sm">
-            Cancel
-          </button>
+          <button onClick={onClose} className="text-sm">Cancel</button>
           <button
             onClick={() => updateMutation.mutate()}
             className="bg-blue-600 text-white px-3 py-1 rounded text-sm"

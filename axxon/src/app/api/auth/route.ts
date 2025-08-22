@@ -1,4 +1,5 @@
 //This route might be utilized in the future if additional login/signup approaches are implemented
+'use server';
 
 import { handleOAuthLogin } from "@/lib/controllers/auth/authController";
 import { NextRequest } from "next/server";

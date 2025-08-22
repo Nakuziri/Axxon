@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import {  UpdateBoard } from "@/lib/types/boardTypes";
+import { UpdateBoard } from "@/lib/types/boardTypes";
 
 type BoardOptionsModalProps = {
   board: UpdateBoard;
@@ -16,7 +16,6 @@ export default function BoardOptionsModal({
   onDelete,
   onInvite,
 }: BoardOptionsModalProps) {
-  // Ref to container div to manage keyboard events and focus
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,27 +26,27 @@ export default function BoardOptionsModal({
       }
       if (event.key === "Enter") {
         event.preventDefault();
-        // Trigger click on the currently focused button
         const active = document.activeElement;
         if (active && active instanceof HTMLButtonElement) {
           active.click();
         }
       }
     }
+
     document.addEventListener("keydown", handleKeyDown);
 
-    // Focus first button when modal opens for accessibility
+    // Focus first button for accessibility
     if (containerRef.current) {
       const firstButton = containerRef.current.querySelector("button");
-      if (firstButton instanceof HTMLElement) {
-        firstButton.focus();
-      }
+      if (firstButton instanceof HTMLElement) firstButton.focus();
     }
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
+
+  // Safely fallback if board name/color are undefined
+  const boardName = board.name || "Untitled Board";
+  const boardColor = board.color || "#000000";
 
   return (
     <div
@@ -56,12 +55,16 @@ export default function BoardOptionsModal({
       aria-modal="true"
       aria-labelledby="board-options-title"
       ref={containerRef}
-      tabIndex={-1} //focuseable container for keyboard events
+      tabIndex={-1}
     >
-      <div className="bg-white p-6 rounded-xl shadow-md space-y-4 w-full max-w-md text-black tracking-wide">
+      <div
+        className="bg-white p-6 rounded-xl shadow-md space-y-4 w-full max-w-md text-black tracking-wide"
+        style={{ borderColor: boardColor }}
+      >
         <h2 id="board-options-title" className="text-xl font-semibold">
-          Board Options
+          {boardName} Options
         </h2>
+
         <button
           onClick={() => {
             onEdit();
@@ -71,9 +74,10 @@ export default function BoardOptionsModal({
         >
           Edit Board
         </button>
+
         <button
           onClick={() => {
-            if (confirm("Delete this board?")) {
+            if (confirm(`Delete board "${boardName}"?`)) {
               onDelete();
             }
             onClose();
@@ -82,6 +86,7 @@ export default function BoardOptionsModal({
         >
           Delete Board
         </button>
+
         <button
           onClick={() => {
             onInvite();

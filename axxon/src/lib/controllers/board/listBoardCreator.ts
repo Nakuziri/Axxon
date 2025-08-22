@@ -1,4 +1,3 @@
-// In your controller 
 import { NextRequest, NextResponse} from "next/server";
 import { Board } from "@/lib/models/board";
 

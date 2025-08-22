@@ -9,7 +9,7 @@ import { fetchTodosWithLabels } from '@/lib/api/getTodosWithLabels'
 import { CategoryBaseData } from '@/lib/types/categoryTypes'
 import { TodoWithLabels } from '@/lib/types/todoTypes'
 import { useUpdateTodoMutation } from '@/lib/mutations/useUpdateTodo'
-import { DndContext, closestCenter, DragEndEvent, DragStartEvent, useDroppable, useDraggable } from '@dnd-kit/core'
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 import DroppableColumn from './DroppableColumn'
 import Modal from '@/components/features/boardView/CreateTodoModal'

@@ -3,9 +3,21 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import clsx from "clsx";
 
+type Todo = {
+  id: number | string;
+  text: string;
+  color?: string;
+};
+
+type TodosByDate = Record<string, Todo[]>;
+
+type CalendarProps = {
+  todosByDate: TodosByDate;
+};
+
 const daysOfWeek = ["Sun", "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat"];
 
-export default function Calendar({ todosByDate }) {
+export default function Calendar({ todosByDate }: CalendarProps) {
   const today = dayjs();
   const monthsBefore = 12;
   const monthsAfter = 12;

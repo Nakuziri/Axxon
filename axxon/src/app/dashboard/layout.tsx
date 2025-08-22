@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Sidebar from "@/components/ui/sideBar";
-import { Plus, LayoutDashboard } from "lucide-react";
 
 export default function DashboardLayout({
   children,

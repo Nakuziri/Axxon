@@ -7,13 +7,12 @@ import { fetchLabels } from '@/lib/api/getLabels'
 import BoardView from '../../../components/features/boardView/BoardView'
 import { notFound } from 'next/navigation' 
 
-type Props = {
-  params: { boardId: string }
-}
+export default async function BoardPage({ params }: any) {
+  // Normalize boardId in case it comes as an array
+  const boardId = Array.isArray(params.boardId) ? params.boardId[0] : params.boardId;
 
-export default async function BoardPage({ params: { boardId } }: Props) {
-  const queryClient = getQueryClient()
-  
+  const queryClient = getQueryClient();
+
   try {
     await Promise.all([
       queryClient.prefetchQuery({
@@ -40,7 +39,6 @@ export default async function BoardPage({ params: { boardId } }: Props) {
 
   const dehydratedState = dehydrate(queryClient)
 
-  
   return (
     <div className="flex flex-col gap-6">
       <HydrationBoundary state={dehydratedState}>

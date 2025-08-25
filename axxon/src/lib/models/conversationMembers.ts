@@ -1,6 +1,6 @@
 import knex from '@/lib/db/db';
-import { AddUserToConversation, ConversationMembersBaseData, ListAllMembersInConvo, RemoveUsersFromConversation } from './types/conversationMemberTypes';
-import { User } from './types/users';
+import { AddUserToConversation, ConversationMembersBaseData, ListAllMembersInConvo, RemoveUsersFromConversation } from '../types/conversationMemberTypes';
+import { User } from '../types/users';
 
 export class ConversationMembers {
 

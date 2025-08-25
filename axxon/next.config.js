@@ -1,27 +1,26 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const nextConfig = {
-   webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      oracledb: false, // prevent knex from trying to bundle oracledb
+      oracledb: false, // keep existing fallback
     };
+
+    if (!isServer) {
+      // Prevent client-side bundle from trying to include Knex
+      config.externals = config.externals || [];
+      config.externals.push('knex');
+    }
 
     return config;
   },
 };
 
-// Make sure adding Sentry options is the last code to run before exporting
+// Wrap with Sentry and export only once
 module.exports = withSentryConfig(nextConfig, {
   org: "nanibro",
   project: "axxon",
-
-  // Only print logs for uploading source maps in CI
-  // Set to `true` to suppress logs
   silent: !process.env.CI,
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
 });
-
-module.exports = nextConfig;

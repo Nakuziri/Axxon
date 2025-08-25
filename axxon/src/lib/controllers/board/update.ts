@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Board } from "@/lib/models/board";
-import { UpdateBoard } from "@/lib/models/types/boardTypes";
+import { UpdateBoard } from "@/lib/types/boardTypes";
 
 export async function updateBoardController(req: NextRequest, params: { boardId: string;}) {
   try{

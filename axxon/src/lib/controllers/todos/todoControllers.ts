@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Todos } from '@/lib/models/todos';
-import type { CreateTodoData, UpdateTodoData } from '@/lib/models/types/todoTypes';
+import type { CreateTodoData, UpdateTodoData } from '@/lib/types/todoTypes';
 
 // Create Todo (POST /board/[boardId]/todos)
 export async function POST(req: NextRequest, params: { boardId: string }) {
@@ -14,6 +14,10 @@ export async function POST(req: NextRequest, params: { boardId: string }) {
     return NextResponse.json(todo, { status: 201 });
   } catch (error) {
     console.error('[CREATE_TODO_ERROR]', error);
+    if (error instanceof Error) {
+    console.error('Error message:', error.message);
+    console.error('Stack trace:', error.stack);
+  }
     return NextResponse.json({ error: 'Failed to create todo' }, { status: 500 });
   }
 }

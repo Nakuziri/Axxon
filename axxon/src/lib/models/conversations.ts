@@ -1,5 +1,5 @@
 import knex from '@/lib/db/db';
-import { ConversationsBaseData, CreateConversation, DeleteConversation, GetConversationById, ListConversationsInBoard } from './types/conversationTypes';
+import { ConversationsBaseData, CreateConversation, DeleteConversation, GetConversationById, ListConversationsInBoard } from '../types/conversationTypes';
 
 export class Conversations {
     static createConversation = async (data:CreateConversation): Promise<ConversationsBaseData> => {

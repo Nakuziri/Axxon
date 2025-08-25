@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoardMembers } from '@/lib/models/boardMembers';
-import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/models/types/boardMemberTypes';
+import { AddBoardMembersByEmail, GetMemberById, RemoveBoardMember } from '@/lib/types/boardMemberTypes';
 
 //has to be specifically setup like this due to working with dynamic route
 //lists all boards users is a member of
 export async function GET(_req: NextRequest, params: { id: string }) {
   try{
-    const user_id = Number(params.id);
+    const user_id =  Number(params.id);
     const boards = await BoardMembers.listBoardsForUser({ user_id });
     
     return NextResponse.json(boards, { status: 200 });

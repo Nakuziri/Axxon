@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Categories } from '@/lib/models/categories';
-import type { CreateCategory, UpdateCategory } from '@/lib/models/types/categoryTypes';
+import type { CreateCategory, UpdateCategory } from '@/lib/types/categoryTypes';
 
 // creates categories
 export async function POST(req: NextRequest, context: { params: { boardId: string } }) {
@@ -20,17 +20,32 @@ export async function POST(req: NextRequest, context: { params: { boardId: strin
 }
 
 // updates categories
-export async function PATCH(req: NextRequest, params: { boardId: string; categoryId: string }) {
+export async function PATCH(
+  req: NextRequest,
+  params: { boardId: string; categoryId: string }
+) {
   try {
     const board_id = Number(params.boardId);
     const id = Number(params.categoryId);
+
     const body = await req.json();
 
-    const data: UpdateCategory = { ...body, id, board_id };
+    // Only allow certain fields
+    const allowedKeys: Array<keyof UpdateCategory> = ['name', 'color', 'position', 'is_done'];
+    const filteredBody = Object.fromEntries(
+      Object.entries(body).filter(([key]) => allowedKeys.includes(key as keyof UpdateCategory))
+    );
 
-    const category = await Categories.updateCategory(data);
+    const data: UpdateCategory = { ...filteredBody, id, board_id };
 
-    return NextResponse.json(category, { status: 200 });
+    // Remove position if it's undefined or null
+    if (data.position === undefined || data.position === null) {
+      delete data.position;
+    }
+
+    const updatedCategory = await Categories.updateCategory(data);
+
+    return NextResponse.json(updatedCategory, { status: 200 });
   } catch (error) {
     console.error('[UPDATE_CATEGORY_ERROR]', error);
     return NextResponse.json({ error: 'Failed to update category' }, { status: 500 });

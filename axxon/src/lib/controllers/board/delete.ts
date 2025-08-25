@@ -4,7 +4,7 @@ import { Board } from '@/lib/models/board';
 
 export async function deleteBoardController(_req: NextRequest, params: {boardId: string}) {
   try{
-    const id = Number(params.boardId);
+    const id = params.boardId;
     const result = await Board.deleteBoard({id});
    
     return NextResponse.json(result, {status: 200});

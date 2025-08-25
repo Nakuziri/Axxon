@@ -1,7 +1,7 @@
 import knex from '@/lib/db/db';
-import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMembersByEmail, GetMemberById, BoardMembersBaseData } from './types/boardMemberTypes';
-import type { BoardBaseData } from './types/boardTypes';
-import type { User } from './types/users';
+import type { ListBoardsForUser, GetAllMembersForBoard, RemoveBoardMember, AddBoardMembersByEmail, GetMemberById, BoardMembersBaseData } from '../types/boardMemberTypes';
+import type { BoardBaseData } from '../types/boardTypes';
+import type { User } from '../types/users';
 import { Conversations } from './conversations';
 
 

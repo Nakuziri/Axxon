@@ -30,7 +30,7 @@
     "next.config.js", 
     "instrumentation-client.js",
     "migrations/**/*.ts",
-    "knexfiles.ts",
+    "knexfiles.ts", "knexfile.ts",
   ],
   "exclude": ["node_modules"]
 }

@@ -6,7 +6,7 @@ import { Users } from '@/lib/models/users';
 
 const clientId = process.env.GOOGLE_CLIENT_ID!;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-const redirectUri = 'http://localhost:3000/api/auth/google/callback';
+const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI!;
 const jwtSecret = process.env.JWT_SECRET!;
 
 export async function GET(req: NextRequest) {
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     );
 
     // Set cookie and redirect
-    const response = NextResponse.redirect('http://localhost:3000/dashboard');
+    const response = NextResponse.redirect(new URL('/dashboard', req.url));
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

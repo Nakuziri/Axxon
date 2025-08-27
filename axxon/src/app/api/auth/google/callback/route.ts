@@ -8,6 +8,7 @@ const clientId = process.env.GOOGLE_CLIENT_ID!;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI!;
 const jwtSecret = process.env.JWT_SECRET!;
+const hostname = process.env.NEXT_PUBLIC_HOSTNAME!;
 
 export async function GET(req: NextRequest) {
   try {
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
     );
 
     // Set cookie and redirect
-    const response = NextResponse.redirect(new URL('/dashboard', req.url));
+    const response = NextResponse.redirect(hostname+'/dashboard');
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -1,6 +1,7 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const nextConfig = {
+  output: "standalone",
   webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,

@@ -1,6 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useSocket } from '@/hooks/useSocket'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchBoard } from '@/lib/api/getSingleBoard'
 import { useState, useMemo } from 'react'
 import { fetchCategories } from '@/lib/api/getCategories'
@@ -26,6 +28,31 @@ export default function BoardView({ boardId }: { boardId: string }) {
   const [selectedTodo, setSelectedTodo] = useState<TodoWithLabels | null>(null)
   //used for drag and drop
   const [activeTodo, setActiveTodo] = useState<TodoWithLabels | null>(null)
+
+  const queryClient = useQueryClient()
+  const socketRef = useSocket(boardId)
+
+  useEffect(() => {
+    if (!socketRef.current) return
+
+    // Join the current board room
+    socketRef.current.emit('joinBoard', boardId)
+
+    const handleBoardUpdate = (update: any) => {
+      // Invalidate only the queries affected by the update
+      queryClient.invalidateQueries({ queryKey: ['todos', boardId] })
+      queryClient.invalidateQueries({ queryKey: ['categories', boardId] })
+      queryClient.invalidateQueries({ queryKey: ['labels', boardId] })
+    }
+
+    socketRef.current.on('board:update', handleBoardUpdate)
+
+    // Cleanup on unmount
+    return () => {
+      socketRef.current?.emit('leaveBoard')
+      socketRef.current?.off('board:update', handleBoardUpdate)
+    }
+  }, [socketRef, boardId, queryClient])
 
   function handleDragStart(event: DragStartEvent) {
     const todo = event.active.data.current?.todo as TodoWithLabels

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Todos } from '@/lib/models/todos';
 import type { CreateTodoData, UpdateTodoData } from '@/lib/types/todoTypes';
+import { publishBoardUpdate } from '@/lib/wsServer'
 
 // Create Todo (POST /board/[boardId]/todos)
 export async function POST(req: NextRequest, params: { boardId: string }) {
@@ -38,19 +39,22 @@ export async function GET(_req: NextRequest, params: { boardId: string }) {
 // Update Todo (PATCH /board/[boardId]/todos/[todoId])
 export async function PATCH(req: NextRequest, params: { boardId: string; todoId: string }) {
   try {
-    const id = Number(params.todoId);
-    const board_id = Number(params.boardId);
-    const body = await req.json();
+    const id = Number(params.todoId)
+    const board_id = Number(params.boardId)
+    const body = await req.json()
 
-    const data: UpdateTodoData = { ...body, id, board_id };
-    const todo = await Todos.updateTodo(data);
+    const data: UpdateTodoData = { ...body, id, board_id }
+    const todo = await Todos.updateTodo(data)
 
-    return NextResponse.json(todo, { status: 200 });
+    // --- PUBLISH TO WEBSOCKET ---
+    await publishBoardUpdate(board_id, { todo }) // sends the updated todo to all clients in this board room
+
+    return NextResponse.json(todo, { status: 200 })
   } catch (error) {
-    console.error('[UPDATE_TODO_ERROR]', error);
-    return NextResponse.json({ error: 'Failed to update todo' }, { status: 500 });
+    console.error('[UPDATE_TODO_ERROR]', error)
+    return NextResponse.json({ error: 'Failed to update todo' }, { status: 500 })
   }
-}
+}}
 
 // Delete Todo (DELETE /board/[boardId]/todos/[todoId])
 export async function DELETE(_req: NextRequest, params: { boardId: string; todoId: string }) {

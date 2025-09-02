@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev-ws" : "npx ts-node src/lib/server.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

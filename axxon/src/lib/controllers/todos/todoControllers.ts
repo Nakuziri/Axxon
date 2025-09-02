@@ -47,14 +47,14 @@ export async function PATCH(req: NextRequest, params: { boardId: string; todoId:
     const todo = await Todos.updateTodo(data)
 
     // --- PUBLISH TO WEBSOCKET ---
-    await publishBoardUpdate(board_id, { todo }) // sends the updated todo to all clients in this board room
+    await publishBoardUpdate(String(board_id), { todo }) // sends the updated todo to all clients in this board room
 
     return NextResponse.json(todo, { status: 200 })
   } catch (error) {
     console.error('[UPDATE_TODO_ERROR]', error)
     return NextResponse.json({ error: 'Failed to update todo' }, { status: 500 })
   }
-}}
+}
 
 // Delete Todo (DELETE /board/[boardId]/todos/[todoId])
 export async function DELETE(_req: NextRequest, params: { boardId: string; todoId: string }) {

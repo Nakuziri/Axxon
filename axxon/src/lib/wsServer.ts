@@ -9,6 +9,8 @@ const sub = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
 // Initialize WebSocket server with Socket.IO
 export function createWsServer(server: http.Server) {
+
+  // Initialize WebSocket server with Socket.IO
   const io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -24,14 +26,28 @@ export function createWsServer(server: http.Server) {
 
   // On Redis publish, forward the message to the correct board room
   sub.on("pmessage", (pattern, channel, message) => {
-    console.log("Redis pmessage received:", { pattern, channel, message });
+    console.log("🔔 Redis pmessage received:", { pattern, channel, message });
 
     try {
       const [, boardId] = channel.split(":"); // channel = board:<boardId>
-      console.log(`Broadcasting message to board room ${boardId}`);
-      io.to(boardId).emit("board:update", JSON.parse(message));
+      const parsed = JSON.parse(message);
+      const { type, payload } = parsed;
+
+      if (!type) {
+        console.warn("⚠️ Redis message missing type field, defaulting to board:update");
+        io.to(boardId).emit("board:update", parsed);
+        return;
+      }
+
+      // Normalize type to colon-separated lowercase
+      const normalizedType = type.replace(/([a-z])([A-Z])/g, "$1:$2").toLowerCase();
+      const eventName = `board:${normalizedType}`;
+
+      console.log(`➡️ Emitting event "${eventName}" to room ${boardId}`, payload);
+
+      io.to(boardId).emit(eventName, payload);
     } catch (err) {
-      console.error("Failed to forward Redis message:", err);
+      console.error("❌ Failed to forward Redis message:", err);
     }
   });
 
@@ -56,6 +72,7 @@ export function createWsServer(server: http.Server) {
       socket.join(boardId);
       currentBoard = boardId;
       console.log(`Socket ${socket.id} joined board ${boardId}`);
+      
     });
 
     // Leave current board explicitly
@@ -73,7 +90,7 @@ export function createWsServer(server: http.Server) {
     });
   });
 
-  return io;
+  return io; // Return the Socket.IO server instance
 }
 
 // Helper to publish events into Redis for cross-instance broadcast

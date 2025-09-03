@@ -38,9 +38,10 @@ export function useSocket(boardId: string) {
       socket.emit("leaveBoard", currentBoardRef.current);
       console.log(`Left board ${currentBoardRef.current}`);
     }
-
+    
     socket.emit("joinBoard", boardId);
     console.log(`Joined board ${boardId}`);
+    
     currentBoardRef.current = boardId;
   }, [boardId]);
 

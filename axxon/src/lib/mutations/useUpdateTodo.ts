@@ -1,39 +1,51 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateTodoById } from '@/lib/api/updateTodoById'
-import { TodoWithLabels } from '@/lib/types/todoTypes'
+// hooks/useUpdateTodoMutation.ts
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateTodoById } from "@/lib/api/updateTodoById";
+import { TodoWithLabels } from "@/lib/types/todoTypes";
 
 export function useUpdateTodoMutation(boardId: string) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ todoId, data }: { todoId: number; data: Partial<TodoWithLabels> }) =>
-      updateTodoById(boardId, todoId, data),
+    // This mutation updates a todo item by its ID
+    mutationFn: async ({ todoId, data }: { todoId: number; data: Partial<TodoWithLabels> }) => {
+      return await updateTodoById(boardId, todoId, data);
+    },
 
+    // Optimistic update
     onMutate: async ({ todoId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['todos', boardId] })
+      await queryClient.cancelQueries({ queryKey: ["todos", boardId] });
 
-      const prevTodos = queryClient.getQueryData<TodoWithLabels[]>(['todos', boardId])
+      // Get current todos for optimistic update
+      const prevTodos = queryClient.getQueryData<TodoWithLabels[]>(["todos", boardId]);
 
-      // Optimistically update todos in cache
-      queryClient.setQueryData<TodoWithLabels[]>(['todos', boardId], (old) =>
+      // Optimistic patch
+      queryClient.setQueryData<TodoWithLabels[]>(["todos", boardId], (old) =>
         old
           ? old.map((todo) =>
               todo.id === todoId ? { ...todo, ...data } : todo
             )
           : []
-      )
+      );
 
-      return { prevTodos }
+      return { prevTodos };
     },
 
     onError: (_err, _vars, context) => {
+      // Roll back if mutation fails
       if (context?.prevTodos) {
-        queryClient.setQueryData(['todos', boardId], context.prevTodos)
+        queryClient.setQueryData(["todos", boardId], context.prevTodos);
       }
     },
 
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos', boardId] })
+    onSuccess: (updatedTodo) => {
+      // Extra safety: patch cache with server response immediately
+      queryClient.setQueryData<TodoWithLabels[]>(["todos", boardId], (old) =>
+        old
+          ? old.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo))
+          : [updatedTodo]
+      );
+
     },
-  })
+  });
 }

@@ -3,20 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n NEXT,WS -c \"blue.bold,green.bold\" \"next dev\" \"npx ts-node src/lib/server.ts\"",
-    "dev-next": "next dev",
-    "dev-ws": "npx ts-node src/lib/server.ts",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "migrate:make": "KNEX_MIGRATION_EXTENSION=ts knex migrate:make --knexfile knexfile.ts",
     "migrate:latest": "ts-node --esm ./node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.ts",
     "seed": "ts-node --esm ./node_modules/knex/bin/cli.js seed:run --knexfile ./knexfile.ts --env development",
-    "rollback": "ts-node --esm ./node_modules/knex/bin/cli.js migrate:rollback --knexfile ./knexfile.ts --env development",
-    "redis:start": "docker compose up -d redis",
-    "redis:stop": "docker compose down",
-    "redis:logs": "docker compose logs -f redis",
-    "redis:cli": "docker exec -it axxon-redis redis-cli"
+    "rollback": "ts-node --esm ./node_modules/knex/bin/cli.js migrate:rollback --knexfile ./knexfile.ts --env development"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -31,7 +25,6 @@
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
-    "ioredis": "^5.7.0",
     "jose": "^6.0.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.539.0",
@@ -42,8 +35,6 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-window": "^1.8.11",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7",
     "zod": "^3.25.64"
   },
@@ -56,7 +47,6 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "autoprefixer": "^10.4.21",
-    "concurrently": "^9.2.1",
     "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",

@@ -62,6 +62,7 @@ Axxon is a modern productivity platform designed to help individuals and teams p
 ```bash
 # Go to dedicated directory
 cd axxon
+
 # Install dependencies
 pnpm install
 

@@ -1,53 +1,47 @@
 'use client'
-
+// Libraries
+import { useState, useMemo} from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+
+//Hooks 
+import { useSocket } from '@/hooks/useSocket'
+import { useBoardRealtime } from '@/hooks/useBoardRealtime'
+import { useUpdateTodoMutation } from '@/lib/mutations/useUpdateTodo'
+import { useDeleteTodoMutation } from '@/lib/mutations/useDeleteTodo'
+
+//API Fetchers
 import { fetchBoard } from '@/lib/api/getSingleBoard'
-import { useState, useMemo } from 'react'
 import { fetchCategories } from '@/lib/api/getCategories'
 import { fetchLabels } from '@/lib/api/getLabels'
 import { fetchTodosWithLabels } from '@/lib/api/getTodosWithLabels'
-import { CategoryBaseData } from '@/lib/types/categoryTypes'
-import { TodoWithLabels } from '@/lib/types/todoTypes'
-import { useUpdateTodoMutation } from '@/lib/mutations/useUpdateTodo'
-import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
+//Components
 import DroppableColumn from './DroppableColumn'
 import Modal from '@/components/features/boardView/CreateTodoModal'
 import AddTodoForm from './CreateTodo'
-import UpdateTodoModal from './UpdateTodoModal'// You’ll create this next
+import UpdateTodoModal from './UpdateTodoModal'
 
+//Types
+import type { CategoryBaseData } from '@/lib/types/categoryTypes'
+import type { TodoWithLabels } from '@/lib/types/todoTypes'
 
 export default function BoardView({ boardId }: { boardId: string }) {
-  //mutation hook for updating todo when dragged between categories
-  const updateTodo = useUpdateTodoMutation(boardId)
-  //used for create modal
+
+  // --- Socket & Realtime ---
+  const socketRef = useSocket(boardId)
+  useBoardRealtime(boardId, socketRef)
+
+  // --- Local State ---
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  //used for update modal
   const [selectedTodo, setSelectedTodo] = useState<TodoWithLabels | null>(null)
-  //used for drag and drop
   const [activeTodo, setActiveTodo] = useState<TodoWithLabels | null>(null)
 
-  function handleDragStart(event: DragStartEvent) {
-    const todo = event.active.data.current?.todo as TodoWithLabels
-    setActiveTodo(todo)
-  }
+  // --- Mutations ---
+  const updateTodo = useUpdateTodoMutation(boardId)
+  const deleteTodo = useDeleteTodoMutation(boardId)
 
-  function handleDragEnd(event: DragEndEvent) {
-    const todo = activeTodo
-    const overCategoryId = Number(event.over?.id)
-    const fromCategoryId = todo?.category_id
-
-    if (todo && overCategoryId && overCategoryId !== fromCategoryId) {
-      //Optimistically update the todo's category placement
-      updateTodo.mutate({
-        todoId: todo.id,
-        data: { category_id: overCategoryId },
-      })
-    }
-
-    setActiveTodo(null)
-  }
-
+  // --- Queries ---
   const { data: board } = useQuery({
     queryKey: ['board', boardId],
     queryFn: () => fetchBoard(boardId),
@@ -66,8 +60,10 @@ export default function BoardView({ boardId }: { boardId: string }) {
   const { data: todos } = useQuery<TodoWithLabels[]>({
     queryKey: ['todos', boardId],
     queryFn: () => fetchTodosWithLabels(boardId),
+    select: (data) => [...data], // Ensure we always get a new reference when cache changes
   })
 
+  // --- Categorize Todos ---
   const categorizedTodos = useMemo(() => {
     if (!todos || !categories) return {}
     return categories.reduce((acc, category) => {
@@ -76,24 +72,34 @@ export default function BoardView({ boardId }: { boardId: string }) {
     }, {} as Record<number, TodoWithLabels[]>)
   }, [todos, categories])
 
-  if (!board || !categories || !todos || !labels) {
-    return <div>Loading board...</div>
+  // --- Drag & Drop ---
+  function handleDragStart(event: DragStartEvent) {
+    const todo = event.active.data.current?.todo as TodoWithLabels
+    setActiveTodo(todo)
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const todo = activeTodo
+    const overCategoryId = Number(event.over?.id)
+    const fromCategoryId = todo?.category_id
+
+    if (todo && overCategoryId && overCategoryId !== fromCategoryId) {
+      updateTodo.mutate({ todoId: todo.id, data: { category_id: overCategoryId } })
+    }
+
+    setActiveTodo(null)
+  }
+
+  // --- Loading State ---
+  if (!board || !categories || !todos || !labels) return <div>Loading board...</div>
+
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-      onDragStart={handleDragStart}
-    >
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-6">{board.name}</h1>
 
         {/* Add Todo Button */}
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
+        <button onClick={() => setIsCreateModalOpen(true)} className="mb-4 px-4 py-2 bg-blue-600 text-white rounded">
           Add Todo
         </button>
 
@@ -103,28 +109,30 @@ export default function BoardView({ boardId }: { boardId: string }) {
             <AddTodoForm boardId={Number(boardId)} />
           </Modal>
         )}
+
         {/* Update Todo Modal */}
         {selectedTodo && (
           <Modal onClose={() => setSelectedTodo(null)}>
             <UpdateTodoModal
               todo={selectedTodo}
-              boardId={boardId}  
+              boardId={boardId}
               onClose={() => setSelectedTodo(null)}
               onDelete={() => {
+                if (selectedTodo) deleteTodo.mutate(selectedTodo.id)
                 setSelectedTodo(null)
               }}
             />
           </Modal>
         )}
+
         {/* Categorized Todos */}
         <div className="flex flex-col gap-6">
-          {categories.map((category) => (
-            // handles todos within each category column
+          {categories.map(category => (
             <DroppableColumn
               key={category.id}
               categoryId={category.id}
               categoryName={category.name}
-              todos={categorizedTodos[category.id] || []} // generates todos within each category column
+              todos={categorizedTodos[category.id] || []}
               onTodoClick={setSelectedTodo}
             />
           ))}

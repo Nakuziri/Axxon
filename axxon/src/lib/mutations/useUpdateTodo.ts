@@ -3,6 +3,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateTodoById } from "@/lib/api/updateTodoById";
 import { TodoWithLabels } from "@/lib/types/todoTypes";
 
+/**
+ * Creates a React Query mutation for updating a todo on the specified board.
+ *
+ * Performs an optimistic update of the cached ["todos", boardId] list by merging
+ * the partial `data` into the matching todo item, and rolls back to the prior
+ * cache snapshot if the mutation fails. On success the server-returned todo
+ * replaces the matching item in the cache (or initializes the list with the
+ * updated todo if none exists).
+ *
+ * @param boardId - ID of the board whose todos cache will be updated
+ * @returns A mutation object (from `useMutation`) for updating a todo by id.
+ */
 export function useUpdateTodoMutation(boardId: string) {
   const queryClient = useQueryClient();
 

@@ -26,6 +26,17 @@ import UpdateTodoModal from './UpdateTodoModal'
 import type { CategoryBaseData } from '@/lib/types/categoryTypes'
 import type { TodoWithLabels } from '@/lib/types/todoTypes'
 
+/**
+ * Renders a draggable kanban-style board for a given board ID.
+ *
+ * Establishes a socket connection and real-time updates for the board, fetches board
+ * data (categories, labels, todos with labels), and renders todos grouped by category.
+ * Provides UI to create, update, and delete todos via modals, and supports dragging
+ * todos between columns — on drop it updates the todo's category using a mutation.
+ *
+ * @param boardId - The board identifier (string) to load and operate on
+ * @returns A React element containing the board view and associated modals
+ */
 export default function BoardView({ boardId }: { boardId: string }) {
 
   // --- Socket & Realtime ---

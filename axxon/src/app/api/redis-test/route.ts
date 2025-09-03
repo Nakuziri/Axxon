@@ -2,6 +2,15 @@
 import { NextResponse } from "next/server";
 import redis from "@/lib/redis";
 
+/**
+ * HTTP GET handler that writes a test key to Redis, reads it back, and returns the result as JSON.
+ *
+ * Sets the key `"test:ping"` to `"pong"` with a 30-second TTL, then reads the value and returns
+ * `{ success: true, key: "test:ping", value }` on success. On error returns a 500 JSON response
+ * `{ success: false, error }`.
+ *
+ * @returns A NextResponse containing the JSON result object.
+ */
 export async function GET() {
   try {
     // write test value

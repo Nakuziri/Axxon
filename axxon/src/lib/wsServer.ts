@@ -7,7 +7,15 @@ import Redis from "ioredis";
 const pub = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 const sub = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
-// Initialize WebSocket server with Socket.IO
+/**
+ * Creates and configures a Socket.IO WebSocket server attached to the provided HTTP server.
+ *
+ * Sets up Redis pub/sub forwarding for channels matching `board:*` to Socket.IO rooms (one room per board),
+ * and registers socket handlers to join/leave board rooms and handle client disconnects.
+ *
+ * @param server - The HTTP server to attach the Socket.IO server to.
+ * @returns The configured Socket.IO `Server` instance.
+ */
 export function createWsServer(server: http.Server) {
 
   // Initialize WebSocket server with Socket.IO
@@ -93,7 +101,15 @@ export function createWsServer(server: http.Server) {
   return io; // Return the Socket.IO server instance
 }
 
-// Helper to publish events into Redis for cross-instance broadcast
+/**
+ * Publish a payload to the Redis channel for a specific board to broadcast updates across instances.
+ *
+ * The payload is JSON-stringified and published to the `board:<boardId>` channel.
+ *
+ * @param boardId - Identifier of the board whose Redis channel will receive the update
+ * @param payload - Data to broadcast; will be serialized with `JSON.stringify`
+ * @returns A promise that resolves when the publish operation completes
+ */
 export async function publishBoardUpdate(boardId: string, payload: any) {
   console.log(`Publishing update to Redis board:${boardId}`, payload);
   await pub.publish(`board:${boardId}`, JSON.stringify(payload));

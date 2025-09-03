@@ -4,6 +4,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Socket } from "socket.io-client";
 import type { RefObject } from "react";
 
+/**
+ * Synchronizes the local React Query "todos" cache with real-time board events over a socket.
+ *
+ * Subscribes to "board:todo:created", "board:todo:updated", and "board:todo:deleted" from the socket and
+ * updates the query cache at key `["todos", boardId]` (append on create, replace by `id` on update,
+ * remove by `id` on delete). Emits "joinBoard" for the active board and emits "leaveBoard" when switching
+ * boards or on cleanup. If `socketRef.current` is null the effect returns early and no subscriptions are made.
+ *
+ * @param boardId - The ID of the board whose todos should stay synchronized.
+ * @param socketRef - A RefObject pointing to the Socket instance (may be null).
+ */
 export function useBoardRealtime(boardId: string, socketRef: RefObject<Socket | null>) {
   const queryClient = useQueryClient();
 

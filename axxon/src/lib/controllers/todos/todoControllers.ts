@@ -4,7 +4,17 @@ import type { CreateTodoData, UpdateTodoData } from '@/lib/types/todoTypes';
 import { publishBoardUpdate } from '@/lib/wsServer'
 import { TodoLabels } from '@/lib/models/todoLabels';
 
-// Create Todo (POST /board/[boardId]/todos)
+/**
+ * Create a new todo for the specified board.
+ *
+ * Attempts to create a todo from the request body, then publishes a realtime
+ * `todo:created` board update with the hydrated todo (includes labels) if
+ * hydration succeeds. Responds with the created todo (status 201) or a 500
+ * JSON error on failure.
+ *
+ * @param params.boardId - Board identifier (stringified number) used to scope the todo and websocket channel.
+ * @returns JSON response containing the created todo (201) or an error object (500).
+ */
 export async function POST(req: NextRequest, params: { boardId: string }) {
   try {
     const board_id = Number(params.boardId);
@@ -45,7 +55,15 @@ export async function GET(_req: NextRequest, params: { boardId: string }) {
   }
 }
 
-// Update Todo (PATCH /board/[boardId]/todos/[todoId])
+/**
+ * Updates a todo in the specified board, hydrates it with labels, and publishes a realtime update.
+ *
+ * Accepts update fields in the request JSON body, combines them with `boardId` and `todoId` from route params,
+ * applies the update, then retrieves the full todo with labels before publishing a `todo:updated` websocket event
+ * for the board.
+ *
+ * @returns 200 with the updated todo object (including attached labels) on success, or 500 with `{ error: "Failed to update todo" }` on failure.
+ */
 export async function PATCH(req: NextRequest, params: { boardId: string; todoId: string }) {
   try {
     const id = Number(params.todoId);
@@ -73,7 +91,14 @@ export async function PATCH(req: NextRequest, params: { boardId: string; todoId:
   }
 }
 
-// Delete Todo (DELETE /board/[boardId]/todos/[todoId])
+/**
+ * Deletes a todo by ID for a given board and publishes a board-level websocket update.
+ *
+ * Converts `params.boardId` and `params.todoId` to numbers, calls the Todos model to delete the todo,
+ * and publishes a `'todo:deleted'` event (payload: `{ id }`) to the board channel.
+ *
+ * @returns JSON response containing `{ deleted }` with HTTP 200 on success, or `{ error: 'Failed to delete todo' }` with HTTP 500 on failure.
+ */
 export async function DELETE(_req: NextRequest, params: { boardId: string; todoId: string }) {
   try {
     const id = Number(params.todoId);

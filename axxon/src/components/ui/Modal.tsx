@@ -5,23 +5,29 @@ import { createPortal } from 'react-dom'
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
+  onSubmit?: () => void // optional callback for enter submissions
   title?: string
   children: React.ReactNode
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  // Handle ESC key
+export default function Modal({ isOpen, onClose, onSubmit, title, children }: ModalProps) {
+  // Handle ESC + Enter keys
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+      }
+      if (e.key === 'Enter' && onSubmit) {
+        e.preventDefault()
+        onSubmit()
+      }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  }, [onClose, onSubmit])
 
   if (!isOpen) return null
 
-  // Render modal in portal to avoid stacking issues
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}

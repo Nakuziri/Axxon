@@ -16,7 +16,8 @@ export default function UpdateCategoryForm({ category, onSave, onDelete, onClose
   const [isDone, setIsDone] = useState(!!category.is_done)
   const [loading, setLoading] = useState(false)
 
-  const handleSave = () => {
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     setLoading(true)
     onSave({ name, color, is_done: isDone })
     setLoading(false)
@@ -30,7 +31,7 @@ export default function UpdateCategoryForm({ category, onSave, onDelete, onClose
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <form onSubmit={handleSave} className="flex flex-col gap-4">
       <label className="flex flex-col">
         Name
         <input
@@ -62,13 +63,14 @@ export default function UpdateCategoryForm({ category, onSave, onDelete, onClose
 
       <div className="flex justify-between mt-4">
         <button
-          onClick={handleSave}
+          type="submit"
           disabled={loading}
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           Save
         </button>
         <button
+          type="button"
           onClick={handleDelete}
           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
@@ -77,11 +79,12 @@ export default function UpdateCategoryForm({ category, onSave, onDelete, onClose
       </div>
 
       <button
+        type="button"
         onClick={onClose}
         className="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
       >
         Cancel
       </button>
-    </div>
+    </form>
   )
 }

@@ -14,6 +14,7 @@ import { useDeleteTodoMutation } from '@/lib/mutations/useDeleteTodo'
 import { useUpdateCategory } from '@/lib/mutations/UseUpdateCategory'
 import { useDeleteCategory } from '@/lib/mutations/useDeleteCategory'
 import { useReorderCategories } from '@/lib/mutations/useReorderCategories'
+import { useCreateCategory } from '@/lib/mutations/useCreateCategory'
 
 // --- Fetchers ---
 import { fetchBoard } from '@/lib/api/boards/getSingleBoard'
@@ -28,6 +29,7 @@ import Modal from '@/components/ui/Modal'
 import AddTodoForm from '@/components/forms/AddTodoForms'
 import UpdateTodoForm from '@/components/forms/UpdateTodoForm'
 import UpdateCategoryForm from '@/components/forms/CategoryForm'
+import Loader from '@/components/ui/loader'
 
 // --- Contexts ---
 import BoardViewContext from '@/context/BoardViewContext'
@@ -60,6 +62,7 @@ export default function BoardView({ boardId }: { boardId: string }) {
   const reorderCategories = useReorderCategories(boardId)
   const updateCategory = useUpdateCategory(boardId)
   const deleteCategory = useDeleteCategory(boardId)
+  const createCategory = useCreateCategory(boardId)
 
   // --- Queries ---
   const { data: board } = useQuery({ queryKey: ['board', boardId], queryFn: () => fetchBoard(boardId) })
@@ -132,10 +135,8 @@ export default function BoardView({ boardId }: { boardId: string }) {
       )
 
       // 2. Commit category reorder if needed
-      if (unsavedOrder) {
-        await reorderCategories.mutateAsync(unsavedOrder.map(String))
-      }
-
+      if (unsavedOrder) await reorderCategories.mutateAsync(unsavedOrder.map(String))
+      
       // 3. Reset local state after successful save
       await Promise.all(updatePromises)
       setUnsavedCategories({})
@@ -145,8 +146,57 @@ export default function BoardView({ boardId }: { boardId: string }) {
     }
   }
 
+    // --- Add Category Handler (Optimistic) ---
+  const handleCreateCategory = () => {
+    if (!categories) return
+
+    const tempId = Date.now()
+    const now = new Date().toISOString()
+    const tempCategory: CategoryBaseData = {
+      id: tempId,
+      board_id: Number(boardId),
+      name: 'New Category',
+      color: '#cccccc',
+      position: categoryOrder.length,
+      is_done: false,
+      created_at: now,
+      updated_at: now,
+    }
+
+    // Optimistically add
+    setCategoryOrder((prev) => [...prev, tempId])
+    setUnsavedCategories((prev) => ({
+      ...prev,
+      [tempId]: tempCategory,
+    }))
+
+    createCategory.mutate(tempCategory, {
+      onSuccess: (newCategory) => {
+        // Replace temp with actual category
+        setCategoryOrder((prev) =>
+          prev.map((id) => (id === tempId ? newCategory.id : id))
+        )
+        setUnsavedCategories((prev) => {
+          const copy = { ...prev }
+          delete copy[tempId]
+          return { ...copy, [newCategory.id]: {} }
+        })
+      },
+      onError: () => {
+        // Rollback if failure
+        setCategoryOrder((prev) => prev.filter((id) => id !== tempId))
+        setUnsavedCategories((prev) => {
+          const copy = { ...prev }
+          delete copy[tempId]
+          return copy
+        })
+      },
+    })
+  }
+
+
   // --- Loading State ---
-  if (!board || !categories || !todos || !labels) return <div>Loading board...</div>
+  if (!board || !categories || !todos || !labels) return <Loader />
 
   // --- Modal Content Renderer ---
   const renderModalContent = () => {
@@ -200,38 +250,69 @@ export default function BoardView({ boardId }: { boardId: string }) {
   // --- Render ---
   return (
     <BoardViewContext.Provider value={{ hideTodos, setHideTodos }}>
-      <div className="p-4">
+      <div className="relative p-4">
         <h1 className="text-2xl font-bold mb-6">{board.name}</h1>
+        {/* --- Board Control Bar --- */}
+        <div className="flex flex-col items-start gap-2 mb-6 m-3">
+          {/* Top Row */}
+          <div className="flex gap-2">
+            {/* Board Management Toggle */}
+            <button
+              onClick={() => {
+                setHideTodos((prev) => {
+                  const newHide = !prev
+                  if (prev) {
+                    // Leaving management mode, discard unsaved changes
+                    setUnsavedOrder(null)
+                    setUnsavedCategories({})
+                    if (categories) {
+                      setCategoryOrder(categories.map((c) => c.id))
+                    }
+                  }
+                  return newHide
+                })
+              }}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              {hideTodos ? 'Disable Board Management' : 'Enable Board Management'}
+            </button>
 
-        {/* Add Todo Button */}
-        <button
-          onClick={() => openModal('ADD_TODO')}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Add Todo
-        </button>
+            {/* Normal Mode: Add Todo */}
+            {!hideTodos && (
+              <button
+                onClick={() => openModal('ADD_TODO')}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Create Todo
+              </button>
+            )}
 
-        {/* Manage Board Button */}
-        <button
-          onClick={() => {
-            setHideTodos((prev) => {
-              const newHide = !prev
-              if (prev) {
-                // Leaving management mode, discard unsaved changes
-                setUnsavedOrder(null)
-                setUnsavedCategories({})
-                if (categories) {
-                  setCategoryOrder(categories.map(c => c.id))
-                }
-              }
-              return newHide
-            })
-          }}
-          className="mt-4 px-4 py-2 bg-gray-600 text-white rounded"
-        >
-          {hideTodos ? 'Show Todos' : 'Hide Todos'}
-        </button>
+            {/* Management Mode: Create Category */}
+            {hideTodos && (
+              <button
+                onClick={handleCreateCategory}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              >
+                Create Category
+              </button>
+            )}
+          </div>
 
+          {/* Bottom Row: Save Changes */}
+          {hideTodos && (
+            <button
+              onClick={handleSaveCategoryChanges}
+              disabled={!unsavedOrder && Object.keys(unsavedCategories).length === 0}
+              className={`px-4 py-2 rounded text-white transition-colors ${
+                !unsavedOrder && Object.keys(unsavedCategories).length === 0
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              Save Changes
+            </button>
+          )}
+        </div>
         {/* Generic Modal */}
         {modalState.type && (
           <Modal
@@ -283,16 +364,8 @@ export default function BoardView({ boardId }: { boardId: string }) {
             })
           )}
         </DndContext>
+      {/* Save button for category updates + reordering */}
 
-        {/* Save button for category updates + reordering */}
-        {hideTodos && (unsavedOrder || Object.keys(unsavedCategories).length > 0) && (
-          <button
-            onClick={handleSaveCategoryChanges}
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
-          >
-            Save Changes
-          </button>
-        )}
       </div>
     </BoardViewContext.Provider>
   )

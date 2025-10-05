@@ -46,7 +46,7 @@ export default function BoardList() {
   if (!id) return <div>Please log in to view your dashboard.</div>
 
   return (
-    <div className="w-70 h-screen overflow-y-auto p-3 border-gray-300 space-y-2">
+    <div className="w-[93%] h-screen overflow-y-auto p-2 m-3 border-gray-300 space-y-2">
       <h1 className="text-4xl text-center font-bold mb-6">Boards</h1>
 
       {boards.length === 0 ? (

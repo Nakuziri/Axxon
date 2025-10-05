@@ -12,7 +12,7 @@ export default function Sidebar({
 }) {
   return (
     <div
-      className={`bg-gray-900 text-white flex flex-col h-screen fixed top-0 left-0 transition-all duration-300 ${
+      className={`bg-gray-900 text-white flex flex-col h-screen fixed top-0 left-0 transition-all duration-300 scrollbar-hidden ${
         collapsed ? "w-16" : "w-70"
       }`}
     >

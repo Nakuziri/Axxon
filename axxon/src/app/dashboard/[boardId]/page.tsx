@@ -1,6 +1,6 @@
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import getQueryClient from '@/lib/utils/queryClient'
-import { fetchBoards } from '@/lib/api/boards/getBoards'
+import { fetchBoard } from '@/lib/api/boards/getSingleBoard'
 import { fetchCategories } from '@/lib/api/categories/getCategories'
 import { fetchTodos } from '@/lib/api/todos/getTodos'
 import { fetchLabels } from '@/lib/api/labels/getLabels'
@@ -8,8 +8,10 @@ import BoardView from '../../../components/features/boardView/BoardView'
 import { notFound } from 'next/navigation' 
 
 export default async function BoardPage({ params }: any) {
-  // Normalize boardId in case it comes as an array
-  const boardId = Array.isArray(params.boardId) ? params.boardId[0] : params.boardId;
+  const resolvedParams = await params;
+  const boardId = Array.isArray(resolvedParams.boardId) 
+    ? resolvedParams.boardId[0] 
+    : resolvedParams.boardId;
 
   const queryClient = getQueryClient();
 
@@ -17,7 +19,7 @@ export default async function BoardPage({ params }: any) {
     await Promise.all([
       queryClient.prefetchQuery({
         queryKey: ['board', boardId],
-        queryFn: () => fetchBoards(boardId),
+        queryFn: () => fetchBoard(boardId),
       }),
       queryClient.prefetchQuery({
         queryKey: ['categories', boardId],
@@ -31,13 +33,13 @@ export default async function BoardPage({ params }: any) {
         queryKey: ['labels', boardId],
         queryFn: () => fetchLabels(boardId),
       }),
-    ])
+    ]);
   } catch (error) {
-    console.error('Prefetch error:', error)
-    return notFound()
+    console.error('Prefetch error:', error);
+    return notFound();
   }
 
-  const dehydratedState = dehydrate(queryClient)
+  const dehydratedState = dehydrate(queryClient);
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,5 +47,6 @@ export default async function BoardPage({ params }: any) {
         <BoardView boardId={boardId} />
       </HydrationBoundary>
     </div>
-  )
+  );
 }
+

@@ -1,7 +1,7 @@
 'use client'
 // --- React & Libraries ---
 import { useState, useMemo, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
@@ -38,8 +38,10 @@ import { useModal } from '@/context/ModalManager'
 // --- Types ---
 import type { CategoryBaseData } from '@/lib/types/categoryTypes'
 import type { TodoWithLabels } from '@/lib/types/todoTypes'
+import { BoardBaseData } from '@/lib/types/boardTypes'
 
 export default function BoardView({ boardId }: { boardId: string }) {
+  const queryClient = useQueryClient()
   const modalTitleMap = { ADD_TODO: 'Add Todo', UPDATE_TODO: 'Update Todo', CATEGORY: 'Category' }
 
   // --- Socket & Realtime ---
@@ -65,10 +67,31 @@ export default function BoardView({ boardId }: { boardId: string }) {
   const createCategory = useCreateCategory(boardId)
 
   // --- Queries ---
-  const { data: board } = useQuery({ queryKey: ['board', boardId], queryFn: () => fetchBoard(boardId) })
-  const { data: categories } = useQuery<CategoryBaseData[]>({ queryKey: ['categories', boardId], queryFn: () => fetchCategories(boardId) })
-  const { data: labels } = useQuery({ queryKey: ['labels', boardId], queryFn: () => fetchLabels(boardId) })
-  const { data: todos } = useQuery<TodoWithLabels[]>({ queryKey: ['todos', boardId], queryFn: () => fetchTodosWithLabels(boardId) })
+  const { data: board } = useQuery<BoardBaseData>({
+    queryKey: ['board', boardId],
+    queryFn: () => fetchBoard(boardId),
+    enabled: !queryClient.getQueryData(['board', boardId]), // Only fetch if cache is empty
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnMount: false,
+  })
+
+  const { data: categories } = useQuery<CategoryBaseData[]>({
+    queryKey: ['categories', boardId],
+    queryFn: () => fetchCategories(boardId),
+    enabled: !queryClient.getQueryData(['categories', boardId]),
+  })
+
+  const { data: labels } = useQuery({
+    queryKey: ['labels', boardId],
+    queryFn: () => fetchLabels(boardId),
+    enabled: !queryClient.getQueryData(['labels', boardId]),
+  })
+
+  const { data: todos } = useQuery<TodoWithLabels[]>({
+    queryKey: ['todos', boardId],
+    queryFn: () => fetchTodosWithLabels(boardId),
+    enabled: !queryClient.getQueryData(['todos', boardId]),
+  })
 
   // --- Category Map with Optimistic Updates ---
   const categoryMap = useMemo(() => {
@@ -194,7 +217,6 @@ export default function BoardView({ boardId }: { boardId: string }) {
     })
   }
 
-
   // --- Loading State ---
   if (!board || !categories || !todos || !labels) return <Loader />
 
@@ -250,8 +272,8 @@ export default function BoardView({ boardId }: { boardId: string }) {
   // --- Render ---
   return (
     <BoardViewContext.Provider value={{ hideTodos, setHideTodos }}>
-      <div className="relative p-4">
-        <h1 className="text-2xl font-bold mb-6">{board.name}</h1>
+      <div className="relative p-4 m-3">
+        <h1 className="text-2xl font-bold m-3 ">{board.name}</h1>
         {/* --- Board Control Bar --- */}
         <div className="flex flex-col items-start gap-2 mb-6 m-3">
           {/* Top Row */}

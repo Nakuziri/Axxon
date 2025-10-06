@@ -3,23 +3,24 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Settings } from 'lucide-react'
 
 import { getUserId } from '@/lib/api/users/getUserId'
 import { fetchBoards } from '@/lib/api/boards/getBoards'
 import { deleteBoardById } from '@/lib/api/boards/deleteBoardById'
 
-import BoardOptionsModal from '@/components/features/dashboard/BoardOptionsModal'
-import InviteMembersModal from '@/components/features/dashboard/InviteMembersModal'
-import EditBoardModal from '@/components/features/dashboard/EditBoardModal'
+import Modal from '@/components/ui/Modal'
+import BoardOptionsForm from '@/components/forms/BoardOptionsForm'
 
 import type { UpdateBoard } from '@/lib/types/boardTypes'
 
 export default function BoardList() {
   const queryClient = useQueryClient()
-  const [editingBoard, setEditingBoard] = useState<UpdateBoard | null>(null)
   const [selectedBoard, setSelectedBoard] = useState<UpdateBoard | null>(null)
-  const [isInviteModalOpen, setInviteModalOpen] = useState(false)
 
+  // -------------------------------
+  // Queries
+  // -------------------------------
   const { data: id, error: userError, isLoading: isUserLoading } = useQuery({
     queryKey: ['id'],
     queryFn: getUserId,
@@ -33,6 +34,9 @@ export default function BoardList() {
     staleTime: 5 * 60 * 1000,
   })
 
+  // -------------------------------
+  // Mutations
+  // -------------------------------
   const deleteMutation = useMutation({
     mutationFn: (boardId: string) => deleteBoardById(boardId),
     onSuccess: () => {
@@ -40,11 +44,17 @@ export default function BoardList() {
     },
   })
 
+  // -------------------------------
+  // Loading / Error States
+  // -------------------------------
   if (isUserLoading || isBoardsLoading) return <div>Loading dashboard...</div>
   if (userError) return <div>Error loading user info</div>
   if (boardsError) return <div>Error loading boards</div>
   if (!id) return <div>Please log in to view your dashboard.</div>
 
+  // -------------------------------
+  // Render
+  // -------------------------------
   return (
     <div className="w-[93%] h-screen overflow-y-auto p-2 m-3 border-gray-300 space-y-2">
       <h1 className="text-4xl text-center font-bold mb-6">Boards</h1>
@@ -63,16 +73,14 @@ export default function BoardList() {
                   <span className="text-lg font-semibold text-gray-900">
                     {board.name || 'Untitled Board'}
                   </span>
-                  <button
+                  <Settings
+                    className="w-5 h-5 text-gray-700 hover:text-black cursor-pointer transition-colors"
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                       setSelectedBoard(board)
                     }}
-                    className="text-sm text-gray-800 hover:underline"
-                  >
-                    Options
-                  </button>
+                  />
                 </div>
               </div>
             </Link>
@@ -80,32 +88,28 @@ export default function BoardList() {
         </div>
       )}
 
-      {editingBoard && (
-        <EditBoardModal
-          board={editingBoard}
-          onClose={() => setEditingBoard(null)}
-          onSuccess={() => {
-            if (id) queryClient.invalidateQueries({ queryKey: ['boards', id] })
-            setEditingBoard(null)
-          }}
-        />
-      )}
-
+      {/* -------------------------------
+          Board Options Modal
+      ------------------------------- */}
       {selectedBoard && (
-        <BoardOptionsModal
-          board={selectedBoard}
+        <Modal
+          isOpen={!!selectedBoard}
           onClose={() => setSelectedBoard(null)}
-          onEdit={() => setEditingBoard(selectedBoard)}
-          onDelete={() => deleteMutation.mutate(String(selectedBoard.id))}
-          onInvite={() => setInviteModalOpen(true)}
-        />
-      )}
-
-      {isInviteModalOpen && selectedBoard && (
-        <InviteMembersModal
-          boardId={Number(selectedBoard.id)}
-          onClose={() => setInviteModalOpen(false)}
-        />
+          title={`Manage "${selectedBoard.name}"`}
+        >
+          <BoardOptionsForm
+            board={selectedBoard}
+            onClose={() => setSelectedBoard(null)}
+            onDelete={() => {
+              deleteMutation.mutate(String(selectedBoard.id))
+              setSelectedBoard(null)
+            }}
+            onSuccess={() => {
+              if (id) queryClient.invalidateQueries({ queryKey: ['boards', id] })
+              setSelectedBoard(null)
+            }}
+          />
+        </Modal>
       )}
     </div>
   )

@@ -1,50 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  getLabelByIdController,
-  PATCH as updateLabel,
-  DELETE as deleteLabel,
-} from '@/lib/controllers/labels/labelControllers';
+  getAllMembersInBoard,
+  addBoardMembersByEmail,
+} from '@/lib/controllers/boardMembers/boardMemberControllers';
 
-// Helper to extract boardId and labelId from the path
+// Helper to extract boardId from the request URL
 function getParams(req: NextRequest) {
   const parts = new URL(req.url).pathname.split('/');
-  // ['', 'api', 'board', boardId, 'labels', labelId]
+  // ['', 'api', 'board', boardId, 'member']
   const boardId = parts[3];
-  const labelId = parts[5];
 
-  if (!boardId || !labelId) {
-    throw new Error('Missing boardId or labelId');
-  }
-
-  return { boardId, labelId };
+  if (!boardId) throw new Error('Missing boardId');
+  return { boardId };
 }
 
+// ------------------------------------------------------------------
+// GET → Get all members in a board
+// ------------------------------------------------------------------
 export async function GET(req: NextRequest) {
   try {
-    const { boardId, labelId } = getParams(req);
-    const label = await getLabelByIdController(req, { boardId, labelId });
-    return NextResponse.json(label);
+    const { boardId } = getParams(req);
+    const members = await getAllMembersInBoard(req, { boardId });
+    return members; // controllers already return NextResponse
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    console.error('[BOARD_MEMBERS_FETCH_ERROR]', error);
+    return NextResponse.json(
+      { error: (error as Error).message || 'Failed to fetch board members' },
+      { status: 400 }
+    );
   }
 }
 
-export async function PATCH(req: NextRequest) {
+// ------------------------------------------------------------------
+// POST → Add members to a board by email
+// ------------------------------------------------------------------
+export async function POST(req: NextRequest) {
   try {
-    const { boardId, labelId } = getParams(req);
-    const updatedLabel = await updateLabel(req, { boardId, labelId });
-    return NextResponse.json(updatedLabel);
+    const { boardId } = getParams(req);
+    const response = await addBoardMembersByEmail(req, { boardId });
+    return response; // controllers already return NextResponse
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    const { boardId, labelId } = getParams(req);
-    const deletedLabel = await deleteLabel(req, { boardId, labelId });
-    return NextResponse.json(deletedLabel);
-  } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    console.error('[BOARD_MEMBER_ADD_ERROR]', error);
+    return NextResponse.json(
+      { error: (error as Error).message || 'Failed to add members' },
+      { status: 400 }
+    );
   }
 }

@@ -1,96 +1,85 @@
-'use client'
-
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateTodoById } from '@/lib/api/todos/updateTodoById'
-import { deleteTodoById } from '@/lib/api/todos/deleteTodoById'
-import type { TodoWithLabels } from '@/lib/types/todoTypes'
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateTodoById } from '@/lib/api/todos/updateTodoById';
+import { deleteTodoById } from '@/lib/api/todos/deleteTodoById';
+import { useBoardMembers } from '@/hooks/UseBoardMembers';
+import type { TodoWithLabels } from '@/lib/types/todoTypes';
 
 interface UpdateTodoFormProps {
-  todo: TodoWithLabels
-  boardId: string | number
-  onClose?: () => void
-  onDelete?: () => void
+  todo: TodoWithLabels;
+  boardId: string | number;
+  onClose?: () => void;
+  onDelete?: () => void;
 }
 
 export default function UpdateTodoForm({ todo, boardId, onClose, onDelete }: UpdateTodoFormProps) {
-  const [title, setTitle] = useState(todo.title)
-  const [description, setDescription] = useState(todo.description || '')
-  const [priority, setPriority] = useState(todo.priority ? String(todo.priority) : '3')
-  const [assigneeId, setAssigneeId] = useState(todo.assignee_id ? String(todo.assignee_id) : '')
+  const queryClient = useQueryClient();
+  const numericBoardId = Number(boardId);
+  const numericTodoId = Number(todo.id);
 
-  const queryClient = useQueryClient()
+  const [title, setTitle] = useState(todo.title);
+  const [description, setDescription] = useState(todo.description || '');
+  const [priority, setPriority] = useState(todo.priority ? String(todo.priority) : '3');
+  const [assigneeId, setAssigneeId] = useState(todo.assignee_id ? String(todo.assignee_id) : '');
 
-  const numericBoardId = Number(boardId)
-  const numericTodoId = Number(todo.id)
+  const { data: members, isLoading: membersLoading } = useBoardMembers(numericBoardId);
 
   const updateMutation = useMutation({
     mutationFn: (updatedData: any) => updateTodoById(numericBoardId, numericTodoId, updatedData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] })
-      onClose?.()
+      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] });
+      onClose?.();
     },
-  })
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteTodoById(numericBoardId, numericTodoId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] })
-      onClose?.()
-      onDelete?.()
+      queryClient.invalidateQueries({ queryKey: ['todos', numericBoardId] });
+      onClose?.();
+      onDelete?.();
     },
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const assigneeIdValue = assigneeId.trim() === '' ? null : Number(assigneeId)
-    if (assigneeIdValue !== null && isNaN(assigneeIdValue)) {
-      alert('Assignee ID must be a number or empty')
-      return
-    }
-
+    e.preventDefault();
     updateMutation.mutate({
       title,
       description,
       priority: Number(priority),
-      assignee_id: assigneeIdValue,
-    })
-  }
+      assignee_id: assigneeId ? Number(assigneeId) : null,
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Todo title"
-        className="w-full p-2 border rounded"
-        required
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description (optional)"
-        className="w-full p-2 border rounded"
-      />
-      <select
-        value={priority}
-        onChange={(e) => setPriority(e.target.value)}
-        className="w-full p-2 border rounded"
-        required
-      >
+      <input value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-2 border rounded" />
+      <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded" />
+
+      <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full p-2 border rounded">
         <option value="1">None</option>
         <option value="2">Low</option>
         <option value="3">Medium</option>
         <option value="4">High</option>
       </select>
-      <input
-        type="text"
-        value={assigneeId}
-        onChange={(e) => setAssigneeId(e.target.value)}
-        placeholder="Assignee ID (optional)"
-        className="w-full p-2 border rounded"
-      />
+
+      {membersLoading ? (
+        <p>Loading members...</p>
+      ) : (
+        <select
+          value={assigneeId}
+          onChange={(e) => setAssigneeId(e.target.value)}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Unassigned</option>
+          {members?.map((m: any) => (
+            <option key={m.id} value={m.id}>
+              {m.name || m.email}
+            </option>
+          ))}
+        </select>
+      )}
+
       <div className="flex justify-between items-center mt-4">
         <button
           type="button"
@@ -114,5 +103,5 @@ export default function UpdateTodoForm({ todo, boardId, onClose, onDelete }: Upd
         </div>
       </div>
     </form>
-  )
+  );
 }

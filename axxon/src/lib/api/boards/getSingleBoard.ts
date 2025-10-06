@@ -6,6 +6,5 @@ export async function fetchBoard(boardId: string) {
 
   const data = await res.json()
 
-  // ✅ Ensure it doesn't return undefined
   return data ?? null
 }
